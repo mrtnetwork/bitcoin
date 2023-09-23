@@ -1,4 +1,4 @@
-package test
+package main
 
 import (
 	"bitcoin/address"
@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestExampleAddress(t *testing.T) {
+func ExampleAddress(t *testing.T) {
 
 	// P2PKH ADDRESS
 	// address in testnet:  myVMJgRi6arv4hLbeUcJYKUJWmFnpjtVme

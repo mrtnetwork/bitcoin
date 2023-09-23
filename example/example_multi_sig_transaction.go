@@ -1,4 +1,4 @@
-package test
+package main
 
 import (
 	"bitcoin/address"
@@ -9,13 +9,11 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
-	"testing"
 )
 
-// spend from 8 different address type to 10 different output
-func TestSpendingFrom8InputTo10Output(t *testing.T) {
+func ExampleMultiSigTransactionSpending() {
 	network := address.TestnetNetwork
-	api := builder.SelectApi(builder.MempoolApi, &network)
+	api := builder.SelectApi(builder.BlockCyperApi, &network)
 	// i generate random mnemonic for test
 	// mnemoic, _ := bip39.GenerateMnemonic(256)
 	mnemonic := "spy often critic spawn produce volcano depart fire theory fog turn retire"
@@ -41,79 +39,106 @@ func TestSpendingFrom8InputTo10Output(t *testing.T) {
 	public3 := sp3.GetPublic()
 	public4 := sp4.GetPublic()
 
-	// now we need some address for spending or receive let doint
-	// For our test, I use public key to create addresses
+	signer1 := builder.MultiSignatureSigner{
+		// public key of signer
+		PublicKey: public1.ToHex(),
+		// siger weight
+		Weight: 2,
+	}
+	signer2 := builder.MultiSignatureSigner{
+		PublicKey: public2.ToHex(),
+		Weight:    2,
+	}
+	signer3 := builder.MultiSignatureSigner{
+		PublicKey: public3.ToHex(),
+		Weight:    1,
+	}
+	signer4 := builder.MultiSignatureSigner{
+		PublicKey: public4.ToHex(),
+		Weight:    1,
+	}
 
-	// P2PKH ADDRESS
-	// myVMJgRi6arv4hLbeUcJYKUJWmFnpjtVme
-	// equals to exampleAddr1 := address.P2PKHAddressFromAddress("myVMJgRi6arv4hLbeUcJYKUJWmFnpjtVme")
-	exampleAddr1 := public1.ToAddress()
+	/*
+		In general, this address requires 5 signatures to spend:
+		2 signatures from signer1
+		2 signatures from signer2
+		and 1 signature from either signer 3 or signer 4.
+		And the address script is as follows
+
+		["OP_5", public1 ,public1 ,public2 ,public2 ,public3 ,public4, "OP_6", "OP_CHECKMULTISIG"]
+
+		And the unlock script will be like this
+
+		["", signer1Signataure, signer1Signataure, signer2Signatur, signer2Signatur, (signer3Signatur or signer4Signatur), ScriptInHex ]
+
+	*/
+	multiSigBuilder, err := builder.CreateMultiSignatureAddress(
+		5, builder.MultiSignaturAddressSigners{
+			signer1,
+			signer2, signer3, signer4,
+		}, address.P2WSHInP2SH, // P2SH(P2WSH)
+	)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	/*
+		In general, this address requires 5 signatures to spend:
+		2 signatures from signer1
+		2 signatures from signer2
+		and 1 signature from either signer 3 or signer 4.
+		And the address script is as follows
+
+		["OP_5", public1 ,public1 ,public2 ,public2 ,public3 ,public4, "OP_6", "OP_CHECKMULTISIG"]
+
+		And the unlock script will be like this
+
+		["", signer1Signataure, signer1Signataure, signer2Signatur, signer2Signatur, (signer3Signatur or signer4Signatur), ScriptInHex ]
+	*/
+	multiSigBuilder2, err2 := builder.CreateMultiSignatureAddress(
+		5, builder.MultiSignaturAddressSigners{
+			signer1,
+			signer2, signer3, signer4,
+		}, address.P2WSH, // P2WSH
+	)
+	if err2 != nil {
+		fmt.Println(err2)
+		return
+	}
+	// P2SH(P2WSH) 5-6 multi-sig ADDRESS
+	// 2MxVXBKFwvkWFeN4nij3n8s2GMeBeqF6cL4
+	multiSigAddress := multiSigBuilder.Address
+
+	// P2SH(P2WPKH) 5-6 multi-sig ADDRESS
+	// tb1q4aw8qjc4eys27y8hnslzqexkgs920ewx8ssuxhwq0sc28vly0w0sv3mvu9
+	multiSigAddress2 := multiSigBuilder2.Address
 
 	// P2TR ADDRESS
 	// tb1pyhmqwlcrws4dxcgalt4mrffgnys879vs59xf6sve4hazyvmhecxq3e6sc0
-	// equals to exampleAddr2 := address.P2TRAddressFromAddress("tb1pyhmqwlcrws4dxcgalt4mrffgnys879vs59xf6sve4hazyvmhecxq3e6sc0")
-	exampleAddr2 := public2.ToTaprootAddress()
-
-	// P2SH(P2PKH) ADDRESS
-	// 2N2yqygBJRvDzLzvPe91qKfSYnK5utGckJX
-	// equals to exampleAddr3 := address.P2SHAddressFromAddress("2N2yqygBJRvDzLzvPe91qKfSYnK5utGckJX", address.P2PKHInP2SH)
-	exampleAddr3 := public2.ToP2PKHInP2SH()
-
-	// P2PKH ADDRESS
-	// mzUzciYUGsNxLCaaHwou27F4RbnDTzKomV
-	// equals to exampleAddr4 := address.P2PKHAddressFromAddress("mzUzciYUGsNxLCaaHwou27F4RbnDTzKomV")
-	exampleAddr4 := public3.ToAddress()
-
-	// P2SH(P2PKH) ADDRESS
-	// 2MzibgEeJYCN8mjJsZTg79AH7au4PCkHXHo
-	// equals to exampleAddr5 := address.P2SHAddressFromAddress("2MzibgEeJYCN8mjJsZTg79AH7au4PCkHXHo", address.P2PKHInP2SH)
-	exampleAddr5 := public3.ToP2PKHInP2SH()
-
-	// P2SH(P2WSH) ADDRESS
-	// 2N7bNV1WPwCVHfoqqRhvtmbAfktazfjHEW2
-	// equals to exampleAddr6 := address.P2SHAddressFromAddress("2N7bNV1WPwCVHfoqqRhvtmbAfktazfjHEW2", address.P2WSHInP2SH)
-	exampleAddr6 := public3.ToP2WSHInP2SH()
-
-	// P2SH(P2WPKH) ADDRESS
-	// 2N38S8G9q6qyEjPWmicqxrVwjq4QiTbcyf4
-	// equals to exampleAddr7 := address.P2SHAddressFromAddress("2N38S8G9q6qyEjPWmicqxrVwjq4QiTbcyf4", address.P2WPKHInP2SH)
-	exampleAddr7 := public3.ToP2WPKHInP2SH()
+	// equals to exampleAddr1 := address.P2TRAddressFromAddress("tb1pyhmqwlcrws4dxcgalt4mrffgnys879vs59xf6sve4hazyvmhecxq3e6sc0")
+	exampleAddr1 := public2.ToTaprootAddress()
 
 	// P2SH(P2PK) ADDRESS
 	// 2MugsNcgzLJ1HosnZyC2CfZVmgbMPK1XubR
-	// equals to exampleAddr8 := address.P2SHAddressFromAddress("2MugsNcgzLJ1HosnZyC2CfZVmgbMPK1XubR", address.P2PKInP2SH)
-	exampleAddr8 := public4.ToP2PKInP2SH()
-
-	// P2WPKH ADDRESS
-	// tb1q6q9halaazasd42gzsc2cvv5xls295w7kawkhxy
-	// equals to exampleAddr9 := address.P2WPKHAddresssFromAddress("tb1q6q9halaazasd42gzsc2cvv5xls295w7kawkhxy")
-	exampleAddr9 := public3.ToSegwitAddress()
+	// equals to exampleAddr2 := address.P2SHAddressFromAddress("2MugsNcgzLJ1HosnZyC2CfZVmgbMPK1XubR", address.P2PKInP2SH)
+	exampleAddr2 := public4.ToP2PKInP2SH()
 
 	// P2WSH ADDRESS
 	// tb1qf4qwtr5kp5q87dtp3ul3402vkzssxfv7f4aettjq2hcfhnt92dmq5xzs6n
-	// equals to exampleAddr10 := address.P2WSHAddresssFromAddress("tb1qf4qwtr5kp5q87dtp3ul3402vkzssxfv7f4aettjq2hcfhnt92dmq5xzs6n")
+	// equals to exampleAddr3 := address.P2WSHAddresssFromAddress("tb1qf4qwtr5kp5q87dtp3ul3402vkzssxfv7f4aettjq2hcfhnt92dmq5xzs6n")
 	// created with 1-1 MultiSig script: ["OP_1", publicHex(Hex of compressed public key) , "OP_1", "OP_CHECKMULTISIG"]
-	exampleAddr10 := public3.ToP2WSHAddress()
+	exampleAddr3 := public3.ToP2WSHAddress()
 
 	// now we chose some address for spending from multiple address
 	// i use some different address type for this
 	spenders := []builder.UtxoOwnerDetails{
-		{PublicKey: public1.ToHex(), Address: exampleAddr1}, // p2pkh address from public1
-		{PublicKey: public2.ToHex(), Address: exampleAddr2}, // P2TRAddress address from public2
-		{PublicKey: public3.ToHex(), Address: exampleAddr7}, // P2SH(P2WPKH) address from public3
-		{PublicKey: public3.ToHex(), Address: exampleAddr9},
-		{PublicKey: public3.ToHex(), Address: exampleAddr10},
-		{PublicKey: public2.ToHex(), Address: exampleAddr3}, // P2SH(P2PKH) address public2
-		{PublicKey: public4.ToHex(), Address: exampleAddr8}, // P2SH(P2PKH) address public2
-		{PublicKey: public3.ToHex(), Address: exampleAddr4}, // p2pkh address from public1
+		{Address: multiSigAddress, MultiSigAddress: multiSigBuilder2},
+		{Address: multiSigAddress2, MultiSigAddress: multiSigBuilder2},
+		{PublicKey: public2.ToHex(), Address: exampleAddr1},
 	}
-	// oh i dont have testnet btc for spending
-	// i use https://coinfaucet.eu/en/btc-testnet/ web site for some faucet
-	// i wait 10 min for confirmed coinfaucet transaction ...
-	// waiting .... i think need more coffe :D
 
-	// ok i got faucet
-	// i need now to read spenders account UTXOS
+	// now we need to read spenders account UTXOS
 	utxos := builder.UtxoWithOwnerList{}
 
 	// i add some method for provider to read utxos from mempol or blockCypher
@@ -121,19 +146,20 @@ func TestSpendingFrom8InputTo10Output(t *testing.T) {
 	for _, spender := range spenders {
 		// read ech address utxo from mempol
 		spenderUtxos, err := api.GetUtxo(spender)
-
-		// oh this address does not have any satoshi for spending
-		if !spenderUtxos.CanSpending() {
-			fmt.Println("address does not have any satoshi for spending: ", spender.Address.Show(network))
-			continue
-		}
 		// oh something bad happen when reading Utxos
 		if err != nil {
 			fmt.Println("something bad happen when reading Utxos: ", err)
 			return
 		}
+		// oh this address does not have any satoshi for spending
+		if !spenderUtxos.CanSpending() {
+			fmt.Println("address does not have any satoshi for spending: ", spender.Address.Show(network))
+			continue
+		}
+
 		// we append address utxos to utxos list
 		utxos = append(utxos, spenderUtxos...)
+
 	}
 	// Well, now we calculate how much we can spend
 	sumOfUtxo := utxos.SumOfUtxosValue()
@@ -147,54 +173,35 @@ func TestSpendingFrom8InputTo10Output(t *testing.T) {
 	}
 
 	fmt.Println("sum of Utxos: ", *sumOfUtxo)
-	// 1817320 sum of all utxos
+	// 656,928 sum of all utxos
 
 	// We consider 50,000 satoshi for the cost
 	// in next example i show you how to calculate fee
-	FEE := big.NewInt(50000)
+	FEE := big.NewInt(50008)
 
-	// now we have 1,767,320 for spending let do it
-	// we create 8 different output with  different address type like (pt2r,p2sh(p2wpkh),p2sh(p2wsh),p2sh(p2pkh),p2sh(p2pk),p2pkh,p2wph,p2wsh and etc..)
-	// We consider the spendable amount for 10 outputs and divide by 10, each output 176,732
-	output1 := builder.BitcoinOutputDetails{
-		Address: exampleAddr4,
-		Value:   big.NewInt(176732),
-	}
-	output2 := builder.BitcoinOutputDetails{
-		Address: exampleAddr9,
-		Value:   big.NewInt(176732),
-	}
+	// now we have 606,920 for spending let do it
+	// we create 5 different output with  different address type
+	// We consider the spendable amount for 5 outputs and divide by 5, each output 121,384
+
 	output3 := builder.BitcoinOutputDetails{
-		Address: exampleAddr10,
-		Value:   big.NewInt(176732),
+		Address: exampleAddr3,
+		Value:   big.NewInt(121384),
 	}
 	output4 := builder.BitcoinOutputDetails{
-		Address: exampleAddr1,
-		Value:   big.NewInt(176732),
+		Address: exampleAddr2,
+		Value:   big.NewInt(121384),
 	}
 	output5 := builder.BitcoinOutputDetails{
-		Address: exampleAddr3,
-		Value:   big.NewInt(176732),
+		Address: exampleAddr1,
+		Value:   big.NewInt(121384),
 	}
 	output6 := builder.BitcoinOutputDetails{
-		Address: exampleAddr2,
-		Value:   big.NewInt(176732),
+		Address: multiSigAddress,
+		Value:   big.NewInt(121384),
 	}
 	output7 := builder.BitcoinOutputDetails{
-		Address: exampleAddr7,
-		Value:   big.NewInt(176732),
-	}
-	output8 := builder.BitcoinOutputDetails{
-		Address: exampleAddr8,
-		Value:   big.NewInt(176732),
-	}
-	output9 := builder.BitcoinOutputDetails{
-		Address: exampleAddr5,
-		Value:   big.NewInt(176732),
-	}
-	output10 := builder.BitcoinOutputDetails{
-		Address: exampleAddr6,
-		Value:   big.NewInt(176732),
+		Address: multiSigAddress2,
+		Value:   big.NewInt(121384),
 	}
 
 	// Well, now it is clear to whom we are going to pay the amount
@@ -203,7 +210,7 @@ func TestSpendingFrom8InputTo10Output(t *testing.T) {
 		// Now, we provide the UTXOs we want to spend.
 		utxos,
 		// We select transaction outputs
-		[]builder.BitcoinOutputDetails{output1, output2, output3, output4, output5, output6, output7, output8, output9, output10},
+		[]builder.BitcoinOutputDetails{output3, output4, output5, output6, output7},
 		/*
 			Transaction fee
 			Ensure that you have accurately calculated the amounts.
@@ -245,7 +252,6 @@ func TestSpendingFrom8InputTo10Output(t *testing.T) {
 	// If you want to use another sighash, you should create another TransactionBuilder
 	transaction, err := transactionBuilder.BuildTransaction(func(trDigest []byte, utxo builder.UtxoWithOwner, multiSigPublicKey string) (string, error) {
 		var key keypair.ECPrivate
-
 		currentPublicKey := utxo.OwnerDetails.PublicKey
 		if utxo.IsMultiSig() {
 			currentPublicKey = multiSigPublicKey
@@ -278,7 +284,6 @@ func TestSpendingFrom8InputTo10Output(t *testing.T) {
 		// We check whether the UTX corresponds to the P2TR address or not.
 		if utxo.Utxo.IsP2tr() {
 			// yes is p2tr utxo and now we use SignTaprootTransaction(Schnorr sign)
-			// for now this transaction builder support only tweak transaction
 			return key.SignTaprootTransaction(
 				trDigest, constant.TAPROOT_SIGHASH_ALL, []interface{}{}, true,
 			), nil
@@ -321,8 +326,7 @@ func TestSpendingFrom8InputTo10Output(t *testing.T) {
 		fmt.Println("something bad happen when sending transaction: ", err)
 		return
 	}
-	// Yes, we did :)  5015a7748d8d6df47358902b6cdc6d77ef839945c479924f4592fd89315ac0e0
-	// Now we check Mempol for what happened https://mempool.space/testnet/tx/5015a7748d8d6df47358902b6cdc6d77ef839945c479924f4592fd89315ac0e0
+	// Yes, we did :)  72b7244693960879bb07f9f96e87790a8b57bb2e91c8dfd79e6f9b8ee520adff
+	// Now we check Mempol for what happened https://mempool.space/testnet/tx/72b7244693960879bb07f9f96e87790a8b57bb2e91c8dfd79e6f9b8ee520adff
 	fmt.Println("Transaction ID: ", trId)
-
 }

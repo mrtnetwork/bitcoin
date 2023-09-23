@@ -1,4 +1,4 @@
-package test
+package main
 
 import (
 	"bitcoin/address"
@@ -9,7 +9,6 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
-	"testing"
 )
 
 /*
@@ -17,7 +16,7 @@ To estimate the transaction cost, we must first create a mock transaction with t
 similar to the examples of sending a transaction. This allows us to determine the transaction size.
 After obtaining the transaction size, we can then create a real transaction with a new fee and send it.
 */
-func TestExampleCalculateFee(t *testing.T) {
+func ExampleCalculateFee() {
 	network := address.TestnetNetwork
 	/*
 		Avoid using Mempool to estimate costs in the Testnet network,
