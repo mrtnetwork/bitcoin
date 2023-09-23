@@ -1,4 +1,4 @@
-package main
+package example
 
 import (
 	"bitcoin/address"
