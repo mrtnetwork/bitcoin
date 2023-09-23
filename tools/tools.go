@@ -1,37 +1,10 @@
 package tools
 
 import (
-	"bitcoin/base58"
-	"bitcoin/digest"
-	"bytes"
 	"encoding/hex"
-	"math/big"
 	"math/bits"
 	"reflect"
 )
-
-func IsValidAddress(address string) bool {
-	if len(address) < 26 || len(address) > 35 {
-		return false
-	}
-
-	decode, err := base58.Decode(address)
-	if err != nil {
-		return false
-	}
-	data := decode[:len(decode)-4]
-	checksum := decode[len(decode)-4:]
-	hash := digest.DoubleHash(data)
-	check := hash[:4]
-	return bytes.Equal(checksum, check)
-}
-func IsValidHash160(hash160 string) bool {
-	if len(hash160) != 40 {
-		return false
-	}
-	_, err := new(big.Int).SetString(hash160, 16)
-	return err
-}
 
 // Converts data to appropriate OP_PUSHDATA OP code including length
 // 0x01-0x4b           -> just length plus data bytes

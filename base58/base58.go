@@ -4,7 +4,6 @@ package base58
 import (
 	"bitcoin/digest"
 	"bytes"
-	"errors"
 	"fmt"
 	"math/big"
 )
@@ -84,14 +83,14 @@ func Encode(data []byte) string {
 // convert a Base58-encoded string back into its original binary data or byte array
 func Decode(s string) ([]byte, error) {
 	if len(s) == 0 {
-		return nil, errors.New("empty input")
+		return nil, fmt.Errorf("empty input")
 	}
 
 	bytes := []int{0}
 	for i := 0; i < len(s); i++ {
 		value, ok := bs58.alphabetMap[s[i]]
 		if !ok {
-			return nil, errors.New("Non-base58 character")
+			return nil, fmt.Errorf("Non-base58 character")
 		}
 
 		carry := value

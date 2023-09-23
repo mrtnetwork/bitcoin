@@ -9,7 +9,7 @@ import (
 	"bitcoin/formating"
 	"bytes"
 	"encoding/hex"
-	"errors"
+	"fmt"
 	"strings"
 )
 
@@ -26,7 +26,7 @@ func NewECPrivate(privateHex string) (*ECPrivate, error) {
 		return nil, err
 	}
 	if !ecc.IsValidBitcoinPrivateKey(privBytes) {
-		return nil, errors.New("invalid private key")
+		return nil, fmt.Errorf("invalid private key")
 	}
 
 	public, _ := ecc.GenerateBitcoinPublicKey(privBytes)
@@ -57,27 +57,27 @@ func (ecPriv *ECPrivate) ToPublic() []byte {
 }
 
 // NewECPrivate creates a new ECPrivate instance from a private key bytes.
-func NewECPrivateFromBytes(privBytes []byte) *ECPrivate {
+func NewECPrivateFromBytes(privBytes []byte) (*ECPrivate, error) {
 	if !ecc.IsValidBitcoinPrivateKey(privBytes) {
-		panic("invalid private key")
+		return nil, fmt.Errorf("invalid private key")
 	}
 
 	public, err := ecc.GenerateBitcoinPublicKey(privBytes)
 	if err != nil {
-		panic("invalid private key")
+		return nil, fmt.Errorf("invalid private key")
 	}
 	return &ECPrivate{
 		privateKey: formating.CopyBytes(privBytes),
 		publicKey:  public,
-	}
+	}, nil
 }
 
 // NewECPrivateFromWIF creates an ECPrivate instance from a WIF string
 // and returns a pointer to the initialized object.
-func NewECPrivateFromWIF(wif string) *ECPrivate {
+func NewECPrivateFromWIF(wif string) (*ECPrivate, error) {
 	b64, err := base58.Decode(wif)
 	if err != nil {
-		panic("invalid WIF length")
+		return nil, fmt.Errorf("invalid WIF length")
 	}
 	lengthWithoutChecksum := len(b64) - 4
 
@@ -116,7 +116,11 @@ func (ecPriv *ECPrivate) ToWIF(compressed bool, networkType address.NetworkInfo)
 }
 
 func (ecPriv *ECPrivate) GetPublic() *ECPublic {
-	return NewECPPublicFromBytes(ecPriv.ToPublic())
+	pub, e := NewECPPublicFromBytes(ecPriv.ToPublic())
+	if e != nil {
+		panic("invalid public key")
+	}
+	return pub
 }
 
 // SignTaprootTransaction signs a transaction digest using the ECPrivate key,
@@ -127,7 +131,7 @@ func (ecPriv *ECPrivate) SignTaprootTransaction(txDigest []byte, sigHash int, sc
 	var keyBytes []byte
 	if tweak {
 		pub := ecPriv.GetPublic()
-		tw := pub.CalculateTweek(scripts)
+		tw, _ := pub.CalculateTweek(scripts)
 		keyBytes = ecc.TweakTaprootPrivate(ecPriv.ToBytes(), tw)
 
 	} else {

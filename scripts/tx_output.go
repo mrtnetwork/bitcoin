@@ -10,12 +10,12 @@ type TxOutput struct {
 	// the value we want to send to this output in satoshis
 	Amount *big.Int
 	// the script that will lock this amount
-	ScriptPubKey Script
+	ScriptPubKey *Script
 }
 
 // NewTxOutput creates a new transaction output with the specified amount and script
 // public key, and returns a pointer to the initialized TxOutput object.
-func NewTxOutput(amount *big.Int, scriptPubKey Script) *TxOutput {
+func NewTxOutput(amount *big.Int, scriptPubKey *Script) *TxOutput {
 	return &TxOutput{
 		Amount:       amount,
 		ScriptPubKey: scriptPubKey,
@@ -25,7 +25,7 @@ func NewTxOutput(amount *big.Int, scriptPubKey Script) *TxOutput {
 // Create a copy of the object
 func (txOutput *TxOutput) Copy() *TxOutput {
 
-	return NewTxOutput(new(big.Int).Set(txOutput.Amount), Script{txOutput.ScriptPubKey.Script})
+	return NewTxOutput(new(big.Int).Set(txOutput.Amount), &Script{txOutput.ScriptPubKey.Script})
 }
 
 // Serialize TxOutput to bytes
@@ -42,7 +42,7 @@ func (txOutput *TxOutput) ToBytes() []byte {
 // raw The hexadecimal raw string of the Transaction
 // The cursor of which the algorithm will start to read the data
 // hasSegwit  Is the Tx Output segwit or not
-func TxOutputFromRaw(raw string, cursor int, hasSegwit bool) (*TxOutput, int) {
+func TxOutputFromRaw(raw string, cursor int, hasSegwit bool) (*TxOutput, int, error) {
 	rawBytes := formating.HexToBytes(raw)
 	// Parse TxOutput from raw bytes
 	value := int64(binary.LittleEndian.Uint64(rawBytes[cursor : cursor+8]))
@@ -54,6 +54,9 @@ func TxOutputFromRaw(raw string, cursor int, hasSegwit bool) (*TxOutput, int) {
 	lockScript := rawBytes[cursor : cursor+vi]
 	cursor += vi
 
-	scriptPubKey := ScriptFromRaw(formating.BytesToHex(lockScript), hasSegwit)
-	return NewTxOutput(big.NewInt(value), *scriptPubKey), cursor
+	scriptPubKey, err := ScriptFromRaw(formating.BytesToHex(lockScript), hasSegwit)
+	if err != nil {
+		return nil, cursor, err
+	}
+	return NewTxOutput(big.NewInt(value), scriptPubKey), cursor, nil
 }

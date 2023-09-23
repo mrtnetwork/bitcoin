@@ -2,7 +2,7 @@
 package bech32
 
 import (
-	"errors"
+	"fmt"
 	"strings"
 )
 
@@ -157,30 +157,30 @@ func convertBits(data []byte, fromBits, toBits int, pad bool) []byte {
 }
 
 // Decode a segwit address.
-func DecodeBech32(address string) (int, []byte, error) {
-	_, data, spec := bech32Decode(address)
+func DecodeBech32(address string) (int, []byte, string, error) {
+	hrp, data, spec := bech32Decode(address)
 	if data == nil {
-		return 0, nil, errors.New("failed to decode Bech32")
+		return 0, nil, "", fmt.Errorf("failed to decode Bech32")
 	}
 
 	bits := convertBits(data[1:], 5, 8, false)
 	if bits == nil || len(bits) < 2 || len(bits) > 40 {
-		return 0, nil, errors.New("invalid bits")
+		return 0, nil, "", fmt.Errorf("invalid bits")
 	}
 
 	if data[0] > 16 {
-		return 0, nil, errors.New("invalid data[0]")
+		return 0, nil, "", fmt.Errorf("invalid data[0]")
 	}
 
 	if data[0] == 0 && len(bits) != 20 && len(bits) != 32 {
-		return 0, nil, errors.New("invalid bits length")
+		return 0, nil, "", fmt.Errorf("invalid bits length")
 	}
 
 	if (data[0] == 0 && spec != Bech32) || (data[0] != 0 && spec != Bech32M) {
-		return 0, nil, errors.New("invalid spec")
+		return 0, nil, "", fmt.Errorf("invalid spec")
 	}
 
-	return int(data[0]), bits, nil
+	return int(data[0]), bits, hrp, nil
 }
 
 // Encode a segwit address.
@@ -194,13 +194,13 @@ func EncodeBech32(hrp string, version int, data []byte) (string, error) {
 
 	bits := convertBits(data, 8, 5, true)
 	if bits == nil {
-		return "", errors.New("failed to convertBits")
+		return "", fmt.Errorf("failed to convertBits")
 	}
 
 	combinedData := append([]byte{byte(version)}, bits...)
 	encoded := bech32Encode(hrp, combinedData, bech32Type)
-	if _, _, err := DecodeBech32(encoded); err != nil {
-		return "", errors.New("failed to decodeBech32")
+	if _, _, _, err := DecodeBech32(encoded); err != nil {
+		return "", fmt.Errorf("failed to decodeBech32")
 	}
 
 	return encoded, nil

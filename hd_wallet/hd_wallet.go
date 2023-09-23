@@ -10,7 +10,7 @@ import (
 	"bitcoin/keypair"
 	"bytes"
 	"encoding/binary"
-	"errors"
+	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
@@ -80,14 +80,14 @@ func FromMnemonic(mnemonic string, passphrase string) (*HdWallet, error) {
 	// Perform the necessary operations to create an HdWallet from a mnemonic and passphrase
 	seed := bip39.ToSeed(mnemonic, passphrase)
 	if len(seed) < 16 {
-		return nil, errors.New("seed should be at least 128 bits")
+		return nil, fmt.Errorf("seed should be at least 128 bits")
 	}
 	if len(seed) > 64 {
-		return nil, errors.New("seed should be at most 512 bits")
+		return nil, fmt.Errorf("seed should be at most 512 bits")
 	}
 
 	hash := digest.HmacSHA512([]byte("Bitcoin seed"), seed)
-	private := keypair.NewECPrivateFromBytes(hash[:32])
+	private, _ := keypair.NewECPrivateFromBytes(hash[:32])
 	chainCode := hash[32:]
 
 	wallet := newHdWalletFromPrivateKey(private, chainCode, 0, 0, nil)
@@ -97,14 +97,14 @@ func FromMnemonic(mnemonic string, passphrase string) (*HdWallet, error) {
 // AddDrive adds a new child HdWallet derived from the current wallet.
 func (hd *HdWallet) addDrive(index int) (*HdWallet, error) {
 	if uint32(index) > maxUint32 || index < 0 {
-		return nil, errors.New("expected UInt32")
+		return nil, fmt.Errorf("expected UInt32")
 	}
 	isHardened := uint32(index) >= highBit
 	data := make([]byte, 37)
 
 	if isHardened {
 		if hd.fromXpub {
-			return nil, errors.New("cannot use hardened path in public wallet")
+			return nil, fmt.Errorf("cannot use hardened path in public wallet")
 		}
 		data[0] = 0x00
 		copy(data[1:], hd.privateKey.ToBytes())
@@ -139,7 +139,10 @@ func (hd *HdWallet) addDrive(index int) (*HdWallet, error) {
 			return hd.addDrive(index + 1)
 		}
 		finger := digest.Hash160(hd.publicKey.ToCompressedBytes())[:4]
-		newPublicKey := keypair.NewECPPublicFromBytes(newPoint)
+		newPublicKey, e := keypair.NewECPPublicFromBytes(newPoint)
+		if e != nil {
+			return nil, e
+		}
 		return newHdWalletFromPublicKey(newPublicKey, chain, childDeph, childIndex, finger), nil
 	}
 
@@ -149,7 +152,10 @@ func (hd *HdWallet) addDrive(index int) (*HdWallet, error) {
 		return hd.addDrive(index + 1)
 	}
 	finger := digest.Hash160(hd.publicKey.ToCompressedBytes())[:4]
-	newPrivateKey := keypair.NewECPrivateFromBytes(newPrivate)
+	newPrivateKey, e := keypair.NewECPrivateFromBytes(newPrivate)
+	if e != nil {
+		return nil, e
+	}
 	return newHdWalletFromPrivateKey(newPrivateKey, chain, childDeph, childIndex, finger), nil
 }
 
@@ -167,11 +173,11 @@ func IsValidPath(path string) bool {
 // DrivePath derives an HdWallet instance from a BIP32 path.
 func DrivePath(masterWallet *HdWallet, path string) (*HdWallet, error) {
 	if !IsValidPath(path) {
-		return nil, errors.New("invalid BIP32 Path")
+		return nil, fmt.Errorf("invalid BIP32 Path")
 	}
 
 	splitPath := strings.Split(path, "/")
-	if splitPath[0] == "m" {
+	if splitPath[0] == "m" || splitPath[0] == "M" {
 		splitPath = splitPath[1:]
 	}
 
@@ -180,11 +186,14 @@ func DrivePath(masterWallet *HdWallet, path string) (*HdWallet, error) {
 		var err error
 
 		if strings.HasSuffix(indexStr, "'") {
+			if masterWallet.fromXpub {
+				return nil, fmt.Errorf("hardened derivation path is invalid for xpublic key")
+			}
 			indexStr = strings.TrimSuffix(indexStr, "'")
 			index, err = strconv.Atoi(indexStr)
 
 			if err != nil || index > int(maxUint31) || index < 0 {
-				return nil, errors.New("wrong index")
+				return nil, fmt.Errorf("wrong index")
 			}
 			newDrive, err := masterWallet.addDrive(index + highBit)
 			if err != nil {
@@ -258,8 +267,11 @@ func isRootKey(xPrivateKey string, network address.NetworkInfo, isPublicKey bool
 }
 
 // GetPrivate returns the private key associated with the HdWallet.
-func (hd *HdWallet) GetPrivate() *keypair.ECPrivate {
-	return hd.privateKey
+func (hd *HdWallet) GetPrivate() (*keypair.ECPrivate, error) {
+	if hd.fromXpub {
+		return nil, fmt.Errorf("cannot access private key from public wallet")
+	}
+	return hd.privateKey, nil
 }
 
 // GetPublic returns the public key associated with the HdWallet.
@@ -352,16 +364,18 @@ func FromXPrivateKey(xPrivateKey string, forRootKey bool, network address.Networ
 	isRootKey, xKeyBytes := isRootKey(xPrivateKey, network, false)
 	// Verify if it matches the expected root key status
 	if forRootKey && !isRootKey {
-		return nil, errors.New("invalid rootXPrivateKey")
+		return nil, fmt.Errorf("invalid rootXPrivateKey")
 	} else if !forRootKey && isRootKey {
-		return nil, errors.New("invalid xPrivateKey")
+		return nil, fmt.Errorf("invalid xPrivateKey")
 	}
 
 	// Decode the xKey bytes
 	xKeyParts := decodeXKeys(xKeyBytes, false)
 	chainCode := xKeyParts[4]
-	privateKey := keypair.NewECPrivateFromBytes(xKeyParts[5])
-
+	privateKey, e := keypair.NewECPrivateFromBytes(xKeyParts[5])
+	if e != nil {
+		return nil, e
+	}
 	index := formating.IntFromBytes(xKeyParts[3], binary.BigEndian)
 	depth := formating.IntFromBytes(xKeyParts[1], binary.BigEndian)
 	fingerprint := xKeyParts[2]
@@ -379,9 +393,9 @@ func FromXPublicKey(xPublicKey string, forceRootKey bool, network address.Networ
 
 	// Verify if it matches the expected root key status
 	if forceRootKey && !isRootKey {
-		return nil, errors.New("invalid rootPublicKey")
+		return nil, fmt.Errorf("invalid rootPublicKey")
 	} else if !forceRootKey && isRootKey {
-		return nil, errors.New("invalid publicKey")
+		return nil, fmt.Errorf("invalid publicKey")
 	}
 
 	// Decode the xKey bytes (public key)
@@ -389,7 +403,10 @@ func FromXPublicKey(xPublicKey string, forceRootKey bool, network address.Networ
 
 	// Extract the necessary parts
 	chainCode := xKeyParts[4]
-	publicKey := keypair.NewECPPublicFromBytes(xKeyParts[5])
+	publicKey, e := keypair.NewECPPublicFromBytes(xKeyParts[5])
+	if e != nil {
+		return nil, e
+	}
 	index := formating.IntFromBytes(xKeyParts[3], binary.BigEndian)
 	depth := formating.IntFromBytes(xKeyParts[1], binary.BigEndian)
 	fingerprint := xKeyParts[2]

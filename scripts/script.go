@@ -30,6 +30,7 @@ type Script struct {
 func NewScript(args ...interface{}) *Script {
 	return &Script{Script: args}
 }
+
 func NewScriptFromList(args []interface{}) *Script {
 	return &Script{Script: args}
 }
@@ -50,12 +51,12 @@ func (s *Script) ToP2shScriptPubKey() *Script {
 }
 
 // Imports a Script commands list from raw hexadecimal data
-func ScriptFromRaw(hexData string, hasSegwit bool) *Script {
+func ScriptFromRaw(hexData string, hasSegwit bool) (*Script, error) {
 	var commands []interface{}
 	index := 0
-	scriptraw, err := hex.DecodeString(hexData)
+	scriptraw, err := formating.HexToBytesCatch(hexData)
 	if err != nil {
-		panic("invalid script bytes")
+		return nil, fmt.Errorf("invalid script bytes")
 	}
 
 	for index < len(scriptraw) {
@@ -93,15 +94,18 @@ func ScriptFromRaw(hexData string, hasSegwit bool) *Script {
 			index += dataSize + size
 		}
 	}
-	return NewScript(commands...)
+	return NewScript(commands...), nil
 }
 
 // GetScriptType determines the script type based on the provided hash and whether it has
 // SegWit data. It returns the identified ScriptType.
-func GetScriptType(hash string, hasSegwit bool) ScriptType {
-	s := ScriptFromRaw(hash, hasSegwit)
+func GetScriptType(hash string, hasSegwit bool) (ScriptType, error) {
+	s, err := ScriptFromRaw(hash, hasSegwit)
+	if err != nil {
+		return -1, err
+	}
 	if len(s.Script) == 0 {
-		return -1
+		return -1, fmt.Errorf("invalid script bytes")
 	}
 	first := s.Script[0]
 	sec := ""
@@ -123,22 +127,22 @@ func GetScriptType(hash string, hasSegwit bool) ScriptType {
 
 	if first == "OP_0" {
 		if len(sec) == 40 {
-			return P2WPKH
+			return P2WPKH, nil
 		} else if len(sec) == 64 {
-			return P2WSH
+			return P2WSH, nil
 		}
 	} else if first == "OP_DUP" {
 		if sec == "OP_HASH160" && four == "OP_EQUALVERIFY" && five == "OP_CHECKSIG" {
-			return P2PKH
+			return P2PKH, nil
 		}
 	} else if first == "OP_HASH160" && th == "OP_EQUAL" {
-		return P2SH
+		return P2SH, nil
 	} else if sec == "OP_CHECKSIG" && first != nil {
 		if len(fmt.Sprintf("%v", first)) == 66 {
-			return P2PK
+			return P2PK, nil
 		}
 	}
-	return -1
+	return -1, fmt.Errorf("invalid script bytes")
 }
 
 // Converts the script to bytes
@@ -176,10 +180,10 @@ func (s *Script) ToHex() string {
 }
 
 // returns the list of strings that makes up this script
-func ToScript(scrips []string) Script {
+func ToScript(scrips []string) *Script {
 	var interfaceList []interface{}
 	for _, str := range scrips {
 		interfaceList = append(interfaceList, str)
 	}
-	return Script{Script: interfaceList}
+	return &Script{Script: interfaceList}
 }

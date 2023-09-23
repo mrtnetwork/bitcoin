@@ -2,7 +2,8 @@ package example
 
 import (
 	"bitcoin/address"
-	"bitcoin/builder"
+	"bitcoin/provider"
+
 	"bitcoin/constant"
 	hdwallet "bitcoin/hd_wallet"
 	"bitcoin/keypair"
@@ -13,7 +14,7 @@ import (
 
 func ExampleMultiSigTransactionSpending() {
 	network := address.TestnetNetwork
-	api := builder.SelectApi(builder.BlockCyperApi, &network)
+	api := provider.SelectApi(provider.BlockCyperApi, &network)
 	// i generate random mnemonic for test
 	// mnemoic, _ := bip39.GenerateMnemonic(256)
 	mnemonic := "spy often critic spawn produce volcano depart fire theory fog turn retire"
@@ -29,34 +30,34 @@ func ExampleMultiSigTransactionSpending() {
 	sp4, _ := hdwallet.DrivePath(masterWallet, "m/44'/0'/0'/0/0/4")
 
 	// access to private key `ECPrivate`
-	private1 := sp1.GetPrivate()
-	private2 := sp2.GetPrivate()
-	private3 := sp3.GetPrivate()
-	private4 := sp4.GetPrivate()
+	private1, _ := sp1.GetPrivate()
+	private2, _ := sp2.GetPrivate()
+	private3, _ := sp3.GetPrivate()
+	private4, _ := sp4.GetPrivate()
 	// access to public key `ECPublic`
 	public1 := sp1.GetPublic()
 	public2 := sp2.GetPublic()
 	public3 := sp3.GetPublic()
 	public4 := sp4.GetPublic()
 
-	signer1 := builder.MultiSignatureSigner{
+	signer1, _ := provider.CreateMultiSignaturSigner(
 		// public key of signer
-		PublicKey: public1.ToHex(),
+		public1.ToHex(),
 		// siger weight
-		Weight: 2,
-	}
-	signer2 := builder.MultiSignatureSigner{
-		PublicKey: public2.ToHex(),
-		Weight:    2,
-	}
-	signer3 := builder.MultiSignatureSigner{
-		PublicKey: public3.ToHex(),
-		Weight:    1,
-	}
-	signer4 := builder.MultiSignatureSigner{
-		PublicKey: public4.ToHex(),
-		Weight:    1,
-	}
+		2,
+	)
+	signer2, _ := provider.CreateMultiSignaturSigner(
+		public2.ToHex(),
+		2,
+	)
+	signer3, _ := provider.CreateMultiSignaturSigner(
+		public3.ToHex(),
+		1,
+	)
+	signer4, _ := provider.CreateMultiSignaturSigner(
+		public4.ToHex(),
+		1,
+	)
 
 	/*
 		In general, this address requires 5 signatures to spend:
@@ -72,8 +73,8 @@ func ExampleMultiSigTransactionSpending() {
 		["", signer1Signataure, signer1Signataure, signer2Signatur, signer2Signatur, (signer3Signatur or signer4Signatur), ScriptInHex ]
 
 	*/
-	multiSigBuilder, err := builder.CreateMultiSignatureAddress(
-		5, builder.MultiSignaturAddressSigners{
+	multiSigBuilder, err := provider.CreateMultiSignatureAddress(
+		5, provider.MultiSignaturAddressSigners{
 			signer1,
 			signer2, signer3, signer4,
 		}, address.P2WSHInP2SH, // P2SH(P2WSH)
@@ -96,8 +97,8 @@ func ExampleMultiSigTransactionSpending() {
 
 		["", signer1Signataure, signer1Signataure, signer2Signatur, signer2Signatur, (signer3Signatur or signer4Signatur), ScriptInHex ]
 	*/
-	multiSigBuilder2, err2 := builder.CreateMultiSignatureAddress(
-		5, builder.MultiSignaturAddressSigners{
+	multiSigBuilder2, err2 := provider.CreateMultiSignatureAddress(
+		5, provider.MultiSignaturAddressSigners{
 			signer1,
 			signer2, signer3, signer4,
 		}, address.P2WSH, // P2WSH
@@ -132,20 +133,20 @@ func ExampleMultiSigTransactionSpending() {
 
 	// now we chose some address for spending from multiple address
 	// i use some different address type for this
-	spenders := []builder.UtxoOwnerDetails{
+	spenders := []provider.UtxoOwnerDetails{
 		{Address: multiSigAddress, MultiSigAddress: multiSigBuilder2},
 		{Address: multiSigAddress2, MultiSigAddress: multiSigBuilder2},
 		{PublicKey: public2.ToHex(), Address: exampleAddr1},
 	}
 
 	// now we need to read spenders account UTXOS
-	utxos := builder.UtxoWithOwnerList{}
+	utxos := provider.UtxoWithOwnerList{}
 
 	// i add some method for provider to read utxos from mempol or blockCypher
 	// looping address to read Utxos
 	for _, spender := range spenders {
 		// read ech address utxo from mempol
-		spenderUtxos, err := api.GetUtxo(spender)
+		spenderUtxos, err := api.GetAccountUtxo(spender)
 		// oh something bad happen when reading Utxos
 		if err != nil {
 			fmt.Println("something bad happen when reading Utxos: ", err)
@@ -183,34 +184,34 @@ func ExampleMultiSigTransactionSpending() {
 	// we create 5 different output with  different address type
 	// We consider the spendable amount for 5 outputs and divide by 5, each output 121,384
 
-	output3 := builder.BitcoinOutputDetails{
+	output3 := provider.BitcoinOutputDetails{
 		Address: exampleAddr3,
 		Value:   big.NewInt(121384),
 	}
-	output4 := builder.BitcoinOutputDetails{
+	output4 := provider.BitcoinOutputDetails{
 		Address: exampleAddr2,
 		Value:   big.NewInt(121384),
 	}
-	output5 := builder.BitcoinOutputDetails{
+	output5 := provider.BitcoinOutputDetails{
 		Address: exampleAddr1,
 		Value:   big.NewInt(121384),
 	}
-	output6 := builder.BitcoinOutputDetails{
+	output6 := provider.BitcoinOutputDetails{
 		Address: multiSigAddress,
 		Value:   big.NewInt(121384),
 	}
-	output7 := builder.BitcoinOutputDetails{
+	output7 := provider.BitcoinOutputDetails{
 		Address: multiSigAddress2,
 		Value:   big.NewInt(121384),
 	}
 
 	// Well, now it is clear to whom we are going to pay the amount
 	// Now let's create the transaction
-	transactionBuilder := builder.NewBitcoinTransactionBuilder(
+	transactionBuilder := provider.NewBitcoinTransactionBuilder(
 		// Now, we provide the UTXOs we want to spend.
 		utxos,
 		// We select transaction outputs
-		[]builder.BitcoinOutputDetails{output3, output4, output5, output6, output7},
+		[]provider.BitcoinOutputDetails{output3, output4, output5, output6, output7},
 		/*
 			Transaction fee
 			Ensure that you have accurately calculated the amounts.
@@ -250,7 +251,7 @@ func ExampleMultiSigTransactionSpending() {
 	// Common sighash types include SIGHASH_ALL, SIGHASH_SINGLE, SIGHASH_ANYONECANPAY, etc.
 	// This TransactionBuilder only works with SIGHASH_ALL and TAPROOT_SIGHASH_ALL for taproot input
 	// If you want to use another sighash, you should create another TransactionBuilder
-	transaction, err := transactionBuilder.BuildTransaction(func(trDigest []byte, utxo builder.UtxoWithOwner, multiSigPublicKey string) (string, error) {
+	transaction, err := transactionBuilder.BuildTransaction(func(trDigest []byte, utxo provider.UtxoWithOwner, multiSigPublicKey string) (string, error) {
 		var key keypair.ECPrivate
 		currentPublicKey := utxo.OwnerDetails.PublicKey
 		if utxo.IsMultiSig() {

@@ -12,9 +12,9 @@ type TxWitnessInput struct {
 
 // NewTxWitnessInput creates a new transaction witness input with the provided stack of strings
 // and returns a pointer to the initialized TxWitnessInput object.
-func NewTxWitnessInput(stack []string) *TxWitnessInput {
+func NewTxWitnessInput(stack ...string) *TxWitnessInput {
 	return &TxWitnessInput{
-		Stack: stack,
+		Stack: append([]string{}, stack...),
 	}
 }
 

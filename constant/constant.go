@@ -175,29 +175,44 @@ var CODE_OPS = map[int]string{
 	178: "OP_NOP3",
 }
 
-const SIGHASH_SINGLE = 0x03
-const SIGHASH_ANYONECANPAY = 0x80
-const TYPE_ABSOLUTE_TIMELOCK = 0x101
-const TYPE_RELATIVE_TIMELOCK = 0x201
-const TYPE_REPLACE_BY_FEE = 0x301
-const SIGHASH_ALL = 0x01
-const SIGHASH_NONE = 0x02
-const TAPROOT_SIGHASH_ALL = 0x00
+// Signature Hash Types
+const (
+	SIGHASH_SINGLE         = 0x03
+	SIGHASH_ANYONECANPAY   = 0x80
+	TYPE_ABSOLUTE_TIMELOCK = 0x101
+	TYPE_RELATIVE_TIMELOCK = 0x201
+	TYPE_REPLACE_BY_FEE    = 0x301
+	SIGHASH_ALL            = 0x01
+	SIGHASH_NONE           = 0x02
+	TAPROOT_SIGHASH_ALL    = 0x00
+)
 
-var DEFAULT_TX_LOCKTIME = []byte{0x00, 0x00, 0x00, 0x00}
-var EMPTY_TX_SEQUENCE = []byte{0x00, 0x00, 0x00, 0x00}
-var DEFAULT_TX_SEQUENCE = []byte{0xff, 0xff, 0xff, 0xff}
-var ABSOLUTE_TIMELOCK_SEQUENCE = []byte{0xfe, 0xff, 0xff, 0xff}
-var REPLACE_BY_FEE_SEQUENCE = []byte{0x01, 0x00, 0x00, 0x00}
+// Default Transaction Locktime and Sequences
+var (
+	DEFAULT_TX_LOCKTIME        = []byte{0x00, 0x00, 0x00, 0x00}
+	EMPTY_TX_SEQUENCE          = []byte{0x00, 0x00, 0x00, 0x00}
+	DEFAULT_TX_SEQUENCE        = []byte{0xff, 0xff, 0xff, 0xff}
+	ABSOLUTE_TIMELOCK_SEQUENCE = []byte{0xfe, 0xff, 0xff, 0xff}
+	REPLACE_BY_FEE_SEQUENCE    = []byte{0x01, 0x00, 0x00, 0x00}
+)
 
+// Leaf Version for TapScript
 const LEAF_VERSION_TAPSCRIPT = 0xc0
 
+// Default Transaction Version
 var DEFAULT_TX_VERSION = []byte{0x02, 0x00, 0x00, 0x00}
 
+// Satoshis per Bitcoin
 const SATOSHIS_PER_BITCOIN = 100000000
+
+// Negative Satoshi Value
 const NEGATIVE_SATOSHI = -1
-const P2PKH_ADDRESS = "p2pkh"
-const P2SH_ADDRESS = "p2sh"
-const P2WPKH_ADDRESS_V0 = "p2wpkhv0"
-const P2WSH_ADDRESS_V0 = "p2wshv0"
-const P2TR_ADDRESS_V1 = "p2trv1"
+
+// Address Types
+const (
+	P2PKH_ADDRESS     = "p2pkh"
+	P2SH_ADDRESS      = "p2sh"
+	P2WPKH_ADDRESS_V0 = "p2wpkhv0"
+	P2WSH_ADDRESS_V0  = "p2wshv0"
+	P2TR_ADDRESS_V1   = "p2trv1"
+)

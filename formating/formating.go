@@ -66,6 +66,13 @@ func HexToBytes(hexStr string) []byte {
 	bytes, _ := hex.DecodeString(strip0x(hexStr))
 	return bytes
 }
+func HexToBytesCatch(hexStr string) ([]byte, error) {
+	bytes, err := hex.DecodeString(strip0x(hexStr))
+	if err != nil {
+		return nil, err
+	}
+	return bytes, nil
+}
 func BytesToHex(hexStr []byte) string {
 	toHex := hex.EncodeToString(hexStr)
 	return toHex

@@ -2,7 +2,7 @@ package address
 
 import (
 	"bitcoin/formating"
-	"errors"
+	"fmt"
 	"strconv"
 )
 
@@ -32,6 +32,7 @@ type networkInfo struct {
 	extendPrivate map[AddressType]string
 	extendPublic  map[AddressType]string
 	network       Network
+	name          string
 }
 
 type NetworkInfo interface {
@@ -47,6 +48,8 @@ type NetworkInfo interface {
 
 // BitcoinNetwork represents the Bitcoin network information.
 var MainnetNetwork = networkInfo{
+	network:     Mainnet,
+	name:        "mainnet",
 	bech32:      "bc",
 	p2PKHPrefix: 0x00,
 	p2SHPrefix:  0x05,
@@ -69,13 +72,13 @@ var MainnetNetwork = networkInfo{
 		P2WSH:        "0x02aa7ed3",
 		P2WSHInP2SH:  "0x0295b43f",
 	},
-	network: Mainnet,
 }
 
 // TestnetNetwork represents the Bitcoin testnet network information.
 var TestnetNetwork = networkInfo{
 	bech32:      "tb",
 	p2PKHPrefix: 0x6f,
+	name:        "testnet",
 	p2SHPrefix:  0xc4,
 	wIF:         0xef,
 	extendPrivate: map[AddressType]string{
@@ -112,7 +115,7 @@ func NetworkFromWIF(wif string) (networkInfo, error) {
 		return TestnetNetwork, nil
 	}
 
-	return networkInfo{}, errors.New("WIF prefix not supported, only Bitcoin or Testnet accepted")
+	return networkInfo{}, fmt.Errorf("WIF prefix not supported, only Bitcoin or Testnet accepted")
 }
 
 // NetworkFromXPrivePrefix returns the Bitcoin address type based on an extended private key prefix.
@@ -181,8 +184,8 @@ func (n *networkInfo) IsMainNet() bool {
 var defaultNetwork = MainnetNetwork
 
 // get default network of application
-func DefaultNetwork() networkInfo {
-	return defaultNetwork
+func DefaultNetwork() *networkInfo {
+	return &defaultNetwork
 }
 
 // update the default network, the methods
@@ -193,60 +196,34 @@ func SetDefaultNetwork(network networkInfo) {
 }
 
 // Find the NetworkInfo type in the function parameters
-func getNetworkParams(args ...interface{}) networkInfo {
+func getNetworkParams(useDefault bool, args ...interface{}) *networkInfo {
 	argruments := formating.FlattenList(args)
-	currentNetwork := DefaultNetwork()
+	var currentNetwork *networkInfo
 	for _, opt := range argruments {
 		switch v := opt.(type) {
 		case NetworkParams:
 			if v.Network != nil {
-				currentNetwork = *v.Network
+				currentNetwork = v.Network
+				break
+			}
+		case *NetworkParams:
+			if v.Network != nil {
+				currentNetwork = v.Network
 				break
 			}
 		case *networkInfo:
 			{
-				currentNetwork = *v
+				currentNetwork = v
 			}
 		case networkInfo:
 			{
-				currentNetwork = v
+				currentNetwork = &v
 			}
 		}
 
+	}
+	if currentNetwork == nil && useDefault {
+		currentNetwork = &defaultNetwork
 	}
 	return currentNetwork
-}
-
-/*
-Find the P2SHAddress type in the function parameters
-args must be AddressType or P2SHAddressTypeParam
-Default P2PKInP2SH
-Choosing the type of address for transaction output is not important,
-but for transaction input and spending from this address,
-an error will be encountered if the transaction is entered incorrectly.
-*/
-func getP2shAddressParam(args ...interface{}) AddressType {
-	argruments := formating.FlattenList(args)
-	defaultP2SHType := P2PKInP2SH
-	for _, opt := range argruments {
-		switch v := opt.(type) {
-		case P2SHAddressTypeParam:
-			if v.AddressType != nil {
-				defaultP2SHType = *v.AddressType
-				break
-			}
-		case AddressType:
-			defaultP2SHType = v
-		}
-	}
-	switch defaultP2SHType {
-	case P2PKHInP2SH, P2WPKHInP2SH, P2WSHInP2SH, P2PKInP2SH:
-		{
-			break
-		}
-	default:
-		panic("invalid p2sh address use one of P2PKHInP2SH,P2WPKHInP2SH,P2WSHInP2SH,P2PKInP2SH")
-	}
-
-	return defaultP2SHType
 }

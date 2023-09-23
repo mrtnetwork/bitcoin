@@ -5,6 +5,7 @@ import (
 	"bitcoin/formating"
 	"encoding/binary"
 	"encoding/hex"
+	"fmt"
 )
 
 // TxInput represents a transaction input
@@ -15,7 +16,7 @@ type TxInput struct {
 	// the index of the UTXO that we want to spend
 	TxIndex int
 	// the script that satisfies the locking conditions (aka unlocking script)
-	ScriptSig Script
+	ScriptSig *Script
 	// the input sequence (for timelocks, RBF, etc.)
 	Sequence []byte
 }
@@ -24,16 +25,17 @@ type TxInput struct {
 // and additional optional arguments for the script and sequence. It returns a pointer
 // to the initialized TxInput object.
 func NewTxInput(txID string, txIndex int, options ...interface{}) *TxInput {
-	script := Script{Script: []interface{}{}}
+	script := &Script{Script: []interface{}{}}
 	sequance := constant.DEFAULT_TX_SEQUENCE
 	for _, opt := range options {
 		switch v := opt.(type) {
 		case Script:
+			script = &v
+		case *Script:
 			script = v
 		case []byte:
 			sequance = v
-		default:
-			panic("invalid Tx Input argruments")
+
 		}
 	}
 	return &TxInput{
@@ -50,7 +52,7 @@ func NewDefaultTxInput(txID string, txIndex int) *TxInput {
 	return &TxInput{
 		TxID:      txID,
 		TxIndex:   txIndex,
-		ScriptSig: Script{},
+		ScriptSig: NewScript(),
 		Sequence:  constant.DEFAULT_TX_SEQUENCE,
 	}
 }
@@ -79,14 +81,14 @@ func (ti *TxInput) ToBytes() []byte {
 }
 
 // FromRaw parses a raw transaction input string into a TxInput
-func TxInputFromRaw(raw string, cursor int, hasSegwit bool) (*TxInput, int) {
-	txInputRaw, err := hex.DecodeString(raw)
+func TxInputFromRaw(raw string, cursor int, hasSegwit bool) (*TxInput, int, error) {
+	txInputRaw, err := formating.HexToBytesCatch(raw)
 	if err != nil {
-		panic("invalid tx input hex")
+		return nil, cursor, err
 	}
 
 	if cursor+32 >= len(txInputRaw) {
-		panic("Input transaction hash not found. Probably malformed raw transaction")
+		return nil, cursor, fmt.Errorf("input transaction hash not found. Probably malformed raw transaction")
 	}
 
 	inpHash := make([]byte, 32)
@@ -94,7 +96,7 @@ func TxInputFromRaw(raw string, cursor int, hasSegwit bool) (*TxInput, int) {
 	cursor += 32
 
 	if cursor+4 >= len(txInputRaw) {
-		panic("Output number not found. Probably malformed raw transaction")
+		return nil, cursor, fmt.Errorf("output number not found. Probably malformed raw transaction")
 	}
 
 	outputN := binary.LittleEndian.Uint32(formating.ReverseBytes(txInputRaw[cursor : cursor+4]))
@@ -104,20 +106,22 @@ func TxInputFromRaw(raw string, cursor int, hasSegwit bool) (*TxInput, int) {
 	cursor += viSize
 
 	if cursor+vi > len(txInputRaw) {
-		panic("Unlocking script length exceeds available data. Probably malformed raw transaction")
+		return nil, cursor, fmt.Errorf("unlocking script length exceeds available data. Probably malformed raw transaction")
 	}
 
 	unlockingScript := txInputRaw[cursor : cursor+vi]
 	cursor += vi
 
 	if cursor+4 > len(txInputRaw) {
-		panic("Sequence number not found. Probably malformed raw transaction")
+		return nil, cursor, fmt.Errorf("Sequence number not found. Probably malformed raw transaction")
 	}
 
 	sequenceNumberData := txInputRaw[cursor : cursor+4]
 	cursor += 4
 
-	script := ScriptFromRaw(formating.BytesToHex(unlockingScript), hasSegwit)
-
-	return NewTxInput(formating.BytesToHex(inpHash), int(outputN), *script, sequenceNumberData), cursor
+	script, err := ScriptFromRaw(formating.BytesToHex(unlockingScript), hasSegwit)
+	if err != nil {
+		return nil, cursor, err
+	}
+	return NewTxInput(formating.BytesToHex(inpHash), int(outputN), *script, sequenceNumberData), cursor, nil
 }

@@ -3,7 +3,7 @@ package ecc
 import (
 	"bitcoin/formating"
 	"crypto/elliptic"
-	"errors"
+	"fmt"
 	"math/big"
 )
 
@@ -71,9 +71,10 @@ func xorBytes(a, b []byte) []byte {
 
 	return result
 }
-func isPointCompressed(p []byte) bool {
-	return p[0] != 0x04
-}
+
+//	func isPointCompressed(p []byte) bool {
+//		return p[0] != 0x04
+//	}
 func isOrderScalar(secret []byte) bool {
 	if len(secret) != 32 {
 		return false
@@ -84,17 +85,17 @@ func isOrderScalar(secret []byte) bool {
 
 func PointAddScalar(public []byte, tweak []byte, compress bool) ([]byte, error) {
 	if !IsPoint(public) {
-		return nil, errors.New("bad Point")
+		return nil, fmt.Errorf("bad Point")
 	}
 	if !isOrderScalar(tweak) {
-		return nil, errors.New("bad Tweek")
+		return nil, fmt.Errorf("bad Tweek")
 	}
 	curve := P256k1()
-	compressed := isPointCompressed(public)
 	x, y := UnCompressedPoint(public)
+
 	var ZERO32 = make([]uint8, 32)
 	if compare(tweak, ZERO32) == 0 {
-		if compressed {
+		if compress {
 			return MarshalCompressed(curve, x, y), nil
 		}
 		return elliptic.Marshal(curve, x, y), nil
@@ -104,21 +105,21 @@ func PointAddScalar(public []byte, tweak []byte, compress bool) ([]byte, error) 
 	uX, uY := curve.Add(x, y, qX, qY)
 	isInfinity := curve.IsOnCurve(uX, uY) && uX.Cmp(big.NewInt(0)) == 0 && uY.Cmp(big.NewInt(0)) == 0
 	if isInfinity {
-		return nil, errors.New("invalid point")
+		return nil, fmt.Errorf("invalid point")
 	}
-	if compressed {
-		return MarshalCompressed(curve, x, y), nil
+	if compress {
+		return MarshalCompressed(curve, uX, uY), nil
 	}
-	return elliptic.Marshal(curve, x, y), nil
+	return elliptic.Marshal(curve, uX, uY), nil
 }
 
 func GenerateTweek(point []byte, tweak []byte) ([]byte, error) {
 	curve := P256k1()
 	if !IsValidBitcoinPrivateKey(point) {
-		return nil, errors.New("bad Point")
+		return nil, fmt.Errorf("bad Point")
 	}
 	if !isOrderScalar(tweak) {
-		return nil, errors.New("bad Tweek")
+		return nil, fmt.Errorf("bad Tweek")
 	}
 	d := decodeBigInt(point)
 	t := decodeBigInt(tweak)
@@ -128,7 +129,7 @@ func GenerateTweek(point []byte, tweak []byte) ([]byte, error) {
 	dt.Mod(dt, curve.Params().N)
 	p := encodeBigInt(dt)
 	if !IsValidBitcoinPrivateKey(p) {
-		return nil, errors.New("bad Private key")
+		return nil, fmt.Errorf("bad Private key")
 	}
 	return p, nil
 }

@@ -7,6 +7,7 @@ import (
 	"bitcoin/ecc"
 	"bitcoin/formating"
 	"bitcoin/scripts"
+	"fmt"
 	"strings"
 )
 
@@ -16,35 +17,35 @@ type ECPublic struct {
 
 // NewECPPublicFromHex creates a new ECPublic instance from a hex-encoded public key
 // and returns a pointer to the initialized object.
-func NewECPPublicFromHex(publicHex string) *ECPublic {
+func NewECPPublicFromHex(publicHex string) (*ECPublic, error) {
 	publicBytes := formating.HexToBytes(publicHex)
 	if !ecc.IsPoint(publicBytes) {
-		panic("invalid public key")
+		return nil, fmt.Errorf("invalid public key")
 	}
 
 	public := ecc.ReEncodedFromForm(publicBytes, false)
 	return &ECPublic{
 		publicKey: public,
-	}
+	}, nil
 }
 
 // NewECPPublicFromBytes creates a new ECPublic instance from a byte slice
 // containing a public key and returns a pointer to the initialized object.
-func NewECPPublicFromBytes(publicBytes []byte) *ECPublic {
+func NewECPPublicFromBytes(publicBytes []byte) (*ECPublic, error) {
 	if !ecc.IsPoint(publicBytes) {
-		panic("invalid public key")
+		return nil, fmt.Errorf("invalid public key")
 	}
 
 	public := ecc.ReEncodedFromForm(publicBytes, false)
 	return &ECPublic{
 		publicKey: public,
-	}
+	}, nil
 }
 
 // ToHex converts the ECPublic key to a hex-encoded string.
 // If 'compressed' is true, the key is in compressed format.
 func (ecPublic *ECPublic) ToHex(compressed ...interface{}) string {
-	c := getCompressedArgs(compressed)
+	c := getCompressedArgs(compressed...)
 	if c {
 		p := ecc.ReEncodedFromForm(ecPublic.ToUnCompressedBytes(true), true)
 		return formating.BytesToHex(p)
@@ -84,81 +85,96 @@ func (ecPublic *ECPublic) ToHash160(compressed ...interface{}) string {
 
 // ToAddress generates a P2PKH (Pay-to-Public-Key-Hash) address from the ECPublic key.
 // If 'compressed' is true, the key is in compressed format.
-func (ecPublic *ECPublic) ToAddress(compressed ...interface{}) address.P2PKHAddress {
+func (ecPublic *ECPublic) ToAddress(compressed ...interface{}) *address.P2PKHAddress {
 	h160 := ecPublic.ToHash160(compressed...)
-	return address.P2PKHAddressFromHash160(h160)
+	addr, _ := address.P2PKHAddressFromHash160(h160)
+	return addr
 }
 
 // ToAddress generates a P2PKH (Pay-to-Public-Key-Hash) address from the ECPublic key.
 // If 'compressed' is true, the key is in compressed format.
-func (ecPublic *ECPublic) ToP2PKHInP2SH(compressed ...interface{}) address.P2SHAdress {
+func (ecPublic *ECPublic) ToP2PKHInP2SH(compressed ...interface{}) *address.P2SHAdress {
 	addr := ecPublic.ToAddress(compressed...)
-	return address.P2SHAddressFromScript(addr.ToScriptPubKey(), address.P2PKHInP2SH)
+	p2sh, _ := address.P2SHAddressFromScript(addr.ToScriptPubKey(), address.P2PKHInP2SH)
+	return p2sh
 }
 
 // ToSegwitAddress generates a P2WPKH (Pay-to-Witness-Public-Key-Hash) SegWit address
 // from the ECPublic key. If 'compressed' is true, the key is in compressed format.
-func (ecPublic *ECPublic) ToSegwitAddress(compressed ...interface{}) address.P2WPKHAddresss {
-	h160 := ecPublic.ToHash160(compressed)
-	return address.P2WPKHAddresssFromProgram(h160)
+func (ecPublic *ECPublic) ToSegwitAddress(compressed ...interface{}) *address.P2WPKHAddresss {
+	h160 := ecPublic.ToHash160(compressed...)
+	addr, _ := address.P2WPKHAddresssFromProgram(h160)
+	return addr
 }
 
 // ToP2PKAddress generates a P2PK (Pay-to-Public-Key) address from the ECPublic key.
 // If 'compressed' is true, the key is in compressed format.
-func (ecPublic *ECPublic) ToP2PKAddress(compressed ...interface{}) address.P2PKAddress {
-	redeem := ecPublic.ToHex(compressed)
-	return address.P2PKAddressFromPublicKey(redeem)
+func (ecPublic *ECPublic) ToP2PKAddress(compressed ...interface{}) *address.P2PKAddress {
+	redeem := ecPublic.ToHex(compressed...)
+	addr, _ := address.P2PKAddressFromPublicKey(redeem)
+	return addr
 }
 
 // ToTaprootAddress generates a Taproot address from the ECPublic key
 // and an optional script. The 'script' parameter can be used to specify
 // custom spending conditions.
-func (ecPublic *ECPublic) ToTaprootAddress(script ...interface{}) address.P2TRAddress {
-	taproot := ecPublic.ToTapRotHex(script)
-	return address.P2TRAddressFromProgram(taproot)
+func (ecPublic *ECPublic) ToTaprootAddress(script ...interface{}) *address.P2TRAddress {
+	taproot, e := ecPublic.ToTapRotHex(script)
+	if e != nil {
+		panic("invalid taaproot program")
+	}
+	addr, e := address.P2TRAddressFromProgram(taproot)
+	if e != nil {
+		panic("invalid taaproot program")
+	}
+	return addr
 }
 
 // ToRedeemScript generates a redeem script from the ECPublic key.
 // If 'compressed' is true, the key is in compressed format.
-func (ecPublic *ECPublic) ToRedeemScript(compressed ...interface{}) scripts.Script {
-	redeem := ecPublic.ToHex(compressed)
-	return scripts.Script{Script: []interface{}{redeem, "OP_CHECKSIG"}}
+func (ecPublic *ECPublic) ToRedeemScript(compressed ...interface{}) *scripts.Script {
+	redeem := ecPublic.ToHex(compressed...)
+	return &scripts.Script{Script: []interface{}{redeem, "OP_CHECKSIG"}}
 }
 
 // ToP2PKInP2SH generates a P2SH (Pay-to-Script-Hash) address
 // wrapping a P2PK (Pay-to-Public-Key) script derived from the ECPublic key.
 // If 'compressed' is true, the key is in compressed format.
-func (ecPublic *ECPublic) ToP2PKInP2SH(compressed ...interface{}) address.P2SHAdress {
-	return address.P2SHAddressFromScript(ecPublic.ToRedeemScript(compressed), address.P2PKInP2SH)
+func (ecPublic *ECPublic) ToP2PKInP2SH(compressed ...interface{}) *address.P2SHAdress {
+	p2sh, _ := address.P2SHAddressFromScript(ecPublic.ToRedeemScript(compressed...), address.P2PKInP2SH)
+	return p2sh
 }
 
 // ToP2WPKHInP2SH generates a P2SH (Pay-to-Script-Hash) address
 // wrapping a P2WPKH (Pay-to-Witness-Public-Key-Hash) script derived from the ECPublic key.
 // If 'compressed' is true, the key is in compressed format.
-func (ecPublic *ECPublic) ToP2WPKHInP2SH(compressed ...interface{}) address.P2SHAdress {
-	addr := ecPublic.ToSegwitAddress(compressed)
-	return address.P2SHAddressFromScript(addr.ToScriptPubKey(), address.P2WPKHInP2SH)
+func (ecPublic *ECPublic) ToP2WPKHInP2SH(compressed ...interface{}) *address.P2SHAdress {
+	addr := ecPublic.ToSegwitAddress(compressed...)
+	segwit, _ := address.P2SHAddressFromScript(addr.ToScriptPubKey(), address.P2WPKHInP2SH)
+	return segwit
 }
 
 // ToP2WSHScript generates a P2WSH (Pay-to-Witness-Script-Hash) script
 // derived from the ECPublic key. If 'compressed' is true, the key is in compressed format.
-func (ecPublic *ECPublic) ToP2WSHScript(compressed ...interface{}) scripts.Script {
-	return *scripts.NewScript("OP_1", ecPublic.ToHex(compressed...), "OP_1", "OP_CHECKMULTISIG")
+func (ecPublic *ECPublic) ToP2WSHScript(compressed ...interface{}) *scripts.Script {
+	return scripts.NewScript("OP_1", ecPublic.ToHex(compressed...), "OP_1", "OP_CHECKMULTISIG")
 }
 
 // ToP2WSHAddress generates a P2WSH (Pay-to-Witness-Script-Hash) address
 // from the ECPublic key. If 'compressed' is true, the key is in compressed format.
-func (ecPublic *ECPublic) ToP2WSHAddress(compressed ...interface{}) address.P2WSHAddresss {
+func (ecPublic *ECPublic) ToP2WSHAddress(compressed ...interface{}) *address.P2WSHAddresss {
 	script := ecPublic.ToP2WSHScript(compressed...)
-	return address.P2WSHAddresssFromScript(script)
+	p2wsh, _ := address.P2WSHAddresssFromScript(script)
+	return p2wsh
 }
 
 // ToP2WSHInP2SH generates a P2SH (Pay-to-Script-Hash) address
 // wrapping a P2WSH (Pay-to-Witness-Script-Hash) script derived from the ECPublic key.
 // If 'compressed' is true, the key is in compressed format.
-func (ecPublic *ECPublic) ToP2WSHInP2SH(compressed ...interface{}) address.P2SHAdress {
-	addr := ecPublic.ToP2WSHAddress(compressed)
-	return address.P2SHAddressFromScript(addr.ToScriptPubKey(), address.P2WSHInP2SH)
+func (ecPublic *ECPublic) ToP2WSHInP2SH(compressed ...interface{}) *address.P2SHAdress {
+	addr := ecPublic.ToP2WSHAddress(compressed...)
+	p2sh, _ := address.P2SHAddressFromScript(addr.ToScriptPubKey(), address.P2WSHInP2SH)
+	return p2sh
 }
 
 // ToUncompressedBytes returns the uncompressed byte representation of the ECPublic key.
@@ -188,17 +204,20 @@ func (ecPublic *ECPublic) ToXOnlyHex() string {
 
 // ToTapRootHex computes and returns the Taproot commitment point's x-coordinate
 // derived from the ECPublic key and an optional script, represented as a hexadecimal string.
-func (ecPublic *ECPublic) ToTapRotHex(script []interface{}) string {
+func (ecPublic *ECPublic) ToTapRotHex(script []interface{}) (string, error) {
 	publicBytes := ecPublic.ToUnCompressedBytes(false)
-	tweak := ecPublic.CalculateTweek(script)
+	tweak, e := ecPublic.CalculateTweek(script)
+	if e != nil {
+		return "", e
+	}
 	point := ecc.TweakTaprootPoint(publicBytes, tweak)
-	return formating.BytesToHex(point[:32])
+	return formating.BytesToHex(point[:32]), nil
 
 }
 
 // tapleafTaggedHash computes and returns the tagged hash of a script for Taproot,
 // using the specified script. It prepends a version byte and then tags the hash with "TapLeaf".
-func tapleafTaggedHash(script scripts.Script) []byte {
+func tapleafTaggedHash(script *scripts.Script) []byte {
 	scriptBytes := formating.PrependVarint(script.ToBytes())
 	part := append([]byte{constant.LEAF_VERSION_TAPSCRIPT}, scriptBytes...)
 	return digest.TaggedHash(part, "TapLeaf")
@@ -222,42 +241,54 @@ func tapBranchTaggedHash(a, b []byte) []byte {
 // getTagHashedMerkleRoot computes and returns the tagged hashed Merkle root for Taproot
 // based on the provided argument. It handles different argument types, including scripts
 // and lists of scripts.
-func getTagHashedMerkleRoot(args interface{}) []byte {
+func getTagHashedMerkleRoot(args interface{}) ([]byte, error) {
 	switch val := args.(type) {
 	case scripts.Script:
-		return tapleafTaggedHash(val)
+		return tapleafTaggedHash(&val), nil
+	case *scripts.Script:
+		return tapleafTaggedHash(val), nil
 	case []interface{}:
 		if len(val) == 0 {
-			return nil // or return an empty Uint8List(0) equivalent in your case
+			return nil, nil
 		} else if len(val) == 1 {
 			return getTagHashedMerkleRoot(val[0])
 		} else if len(val) == 2 {
-			left := getTagHashedMerkleRoot(val[0])
-			right := getTagHashedMerkleRoot(val[1])
-			return tapBranchTaggedHash(left, right)
+			left, e := getTagHashedMerkleRoot(val[0])
+			if e != nil {
+				return nil, e
+			}
+			right, e := getTagHashedMerkleRoot(val[1])
+			if e != nil {
+				return nil, e
+			}
+			return tapBranchTaggedHash(left, right), nil
 		} else {
-			panic("List cannot have more than 2 branches.")
+			return nil, fmt.Errorf("list cannot have more than 2 branches")
+
 		}
 	default:
-		panic("Unsupported argument tyxpe")
+		return nil, fmt.Errorf("unsupported argument tyxpe")
 	}
 }
 
 // CalculateTweak computes and returns the TapTweak value based on the ECPublic key
 // and an optional script. It uses the key's x-coordinate and the Merkle root of the script
 // (if provided) to calculate the tweak.
-func (ecPublic *ECPublic) CalculateTweek(script interface{}) []byte {
+func (ecPublic *ECPublic) CalculateTweek(script interface{}) ([]byte, error) {
 
 	keyX := formating.CopyBytes(ecPublic.publicKey[:32])
 
 	if script == nil {
 		tweek := digest.TaggedHash(keyX, "TapTweak")
-		return tweek
+		return tweek, nil
 	}
 
-	merkleRoot := getTagHashedMerkleRoot(script)
+	merkleRoot, e := getTagHashedMerkleRoot(script)
+	if e != nil {
+		return nil, e
+	}
 	tweek := digest.TaggedHash(append(keyX, merkleRoot...), "TapTweak")
-	return tweek
+	return tweek, nil
 }
 
 // Verify verifies a signature against a message using the ECPublic key.
@@ -289,7 +320,8 @@ func GetSignaturePublic(message string, signature []byte) *ECPublic {
 	rec := ecc.RecoverPublicKey(recid, formating.CopyBytes(signature[1:]), m)
 
 	if rec != nil {
-		return NewECPPublicFromBytes(rec)
+		pub, _ := NewECPPublicFromBytes(rec)
+		return pub
 	}
 	return nil
 }

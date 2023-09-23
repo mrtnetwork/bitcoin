@@ -10,7 +10,7 @@ import (
 )
 
 func TestP2WPKH(t *testing.T) {
-	sk := keypair.NewECPrivateFromWIF("cTALNpTpRbbxTCJ2A5Vq88UxT44w1PE2cYqiB3n4hRvzyCev1Wwo")
+	sk, _ := keypair.NewECPrivateFromWIF("cTALNpTpRbbxTCJ2A5Vq88UxT44w1PE2cYqiB3n4hRvzyCev1Wwo")
 	p2pkhAddr := sk.GetPublic().ToAddress()
 	p2wpkhAddr := sk.GetPublic().ToSegwitAddress()
 
@@ -22,7 +22,7 @@ func TestP2WPKH(t *testing.T) {
 
 	txout2 := scripts.NewTxOutput(big.NewInt(980000), p2pkhAddr.Program().ToScriptPubKey())
 
-	p2pkhRedeemScript := scripts.Script{Script: []interface{}{"OP_DUP", "OP_HASH160", p2pkhAddr.Program().Hash160, "OP_EQUALVERIFY", "OP_CHECKSIG"}}
+	p2pkhRedeemScript := scripts.NewScript("OP_DUP", "OP_HASH160", p2pkhAddr.Program().Hash160, "OP_EQUALVERIFY", "OP_CHECKSIG")
 
 	txinSpendP2pkh := scripts.NewTxInput("1e2a5279c868d61fb2ff0b1c2b04aa3eff02cd74952a8b4e799532635a9132cc", 0)
 
@@ -90,13 +90,13 @@ func TestP2WPKH(t *testing.T) {
 
 	t.Run("test_signed_send_to_p2wpkh", func(t *testing.T) {
 		tx := scripts.NewBtcTransaction(
-			[]scripts.TxInput{*txin1},
-			[]scripts.TxOutput{*txout1},
+			[]*scripts.TxInput{txin1},
+			[]*scripts.TxOutput{txout1},
 			false,
 		)
 		digest := tx.GetTransactionDigest(0, p2pkhAddr.Program().ToScriptPubKey())
 		sig := sk.SingInput(digest)
-		tx.SetScriptSig(0, *scripts.NewScript(sig, sk.GetPublic().ToHex()))
+		tx.SetScriptSig(0, scripts.NewScript(sig, sk.GetPublic().ToHex()))
 		if !strings.EqualFold(tx.Serialize(), createSendToP2wpkhResult) {
 			t.Errorf("Expected %v, but got %v", createSendToP2wpkhResult, tx.Serialize())
 		}
@@ -104,13 +104,13 @@ func TestP2WPKH(t *testing.T) {
 	})
 	t.Run("test_spend_p2wpkh", func(t *testing.T) {
 		tx := scripts.NewBtcTransaction(
-			[]scripts.TxInput{*txinSpend},
-			[]scripts.TxOutput{*txout2},
+			[]*scripts.TxInput{txinSpend},
+			[]*scripts.TxOutput{txout2},
 			true,
 		)
 		digest := tx.GetTransactionSegwitDigit(0, p2pkhRedeemScript, txinSpendAmount)
 		sig := sk.SingInput(digest)
-		witness := scripts.TxWitnessInput{Stack: []string{sig, sk.GetPublic().ToHex()}}
+		witness := scripts.NewTxWitnessInput(sig, sk.GetPublic().ToHex())
 		tx.Witnesses = append(tx.Witnesses, witness)
 
 		if !strings.EqualFold(tx.Serialize(), spendP2pkhResult) {
@@ -120,18 +120,18 @@ func TestP2WPKH(t *testing.T) {
 	})
 	t.Run("test_p2pkh_and_p2wpkh_to_p2pkh", func(t *testing.T) {
 		tx := scripts.NewBtcTransaction(
-			[]scripts.TxInput{*txinSpendP2pkh, *txinSpendP2wpkh},
-			[]scripts.TxOutput{*txout3},
+			[]*scripts.TxInput{txinSpendP2pkh, txinSpendP2wpkh},
+			[]*scripts.TxOutput{txout3},
 			true,
 		)
 		digest := tx.GetTransactionDigest(0, p2pkhAddr.Program().ToScriptPubKey())
 		sig := sk.SingInput(digest)
-		tx.SetScriptSig(0, *scripts.NewScript(sig, sk.GetPublic().ToHex()))
-		witness := scripts.TxWitnessInput{Stack: []string{}}
+		tx.SetScriptSig(0, scripts.NewScript(sig, sk.GetPublic().ToHex()))
+		witness := scripts.NewTxWitnessInput()
 		tx.Witnesses = append(tx.Witnesses, witness)
 		segwitDigest := tx.GetTransactionSegwitDigit(1, p2pkhRedeemScript, txinSpendP2wpkhAmount)
 		sig2 := sk.SingInput(segwitDigest)
-		witness2 := scripts.TxWitnessInput{Stack: []string{sig2, sk.GetPublic().ToHex()}}
+		witness2 := scripts.NewTxWitnessInput(sig2, sk.GetPublic().ToHex())
 		tx.Witnesses = append(tx.Witnesses, witness2)
 		if !strings.EqualFold(tx.Serialize(), p2pkhAndP2wpkhToP2pkhResult) {
 			t.Errorf("Expected %v, but got %v", p2pkhAndP2wpkhToP2pkhResult, tx.Serialize())
@@ -141,15 +141,15 @@ func TestP2WPKH(t *testing.T) {
 
 	t.Run("test_signone_send", func(t *testing.T) {
 		tx := scripts.NewBtcTransaction(
-			[]scripts.TxInput{*txin1Signone},
-			[]scripts.TxOutput{*txout1Signone},
+			[]*scripts.TxInput{txin1Signone},
+			[]*scripts.TxOutput{txout1Signone},
 			true,
 		)
 		digest := tx.GetTransactionSegwitDigit(0, p2pkhRedeemScript, txin1SignoneAmount, constant.SIGHASH_NONE)
 		sig := sk.SingInput(digest, constant.SIGHASH_NONE)
-		witness := scripts.TxWitnessInput{Stack: []string{sig, sk.GetPublic().ToHex()}}
+		witness := scripts.NewTxWitnessInput(sig, sk.GetPublic().ToHex())
 		tx.Witnesses = append(tx.Witnesses, witness)
-		tx.Outputs = append(tx.Outputs, *txout2Signone)
+		tx.Outputs = append(tx.Outputs, txout2Signone)
 		if !strings.EqualFold(tx.Serialize(), testSignoneSendResult) {
 			t.Errorf("Expected %v, but got %v", testSignoneSendResult, tx.Serialize())
 		}
@@ -157,15 +157,15 @@ func TestP2WPKH(t *testing.T) {
 	})
 	t.Run("test_sigsingle_send", func(t *testing.T) {
 		tx := scripts.NewBtcTransaction(
-			[]scripts.TxInput{*txin1Sigsingle},
-			[]scripts.TxOutput{*txout1Sigsingle},
+			[]*scripts.TxInput{txin1Sigsingle},
+			[]*scripts.TxOutput{txout1Sigsingle},
 			true,
 		)
 		digest := tx.GetTransactionSegwitDigit(0, p2pkhRedeemScript, txin1SigsingleAmount, constant.SIGHASH_SINGLE)
 		sig := sk.SingInput(digest, constant.SIGHASH_SINGLE)
-		witness := scripts.TxWitnessInput{Stack: []string{sig, sk.GetPublic().ToHex()}}
+		witness := scripts.NewTxWitnessInput(sig, sk.GetPublic().ToHex())
 		tx.Witnesses = append(tx.Witnesses, witness)
-		tx.Outputs = append(tx.Outputs, *txout2Sigsingle)
+		tx.Outputs = append(tx.Outputs, txout2Sigsingle)
 		if !strings.EqualFold(tx.Serialize(), testSigsingleSendResult) {
 			t.Errorf("Expected %v, but got %v", testSigsingleSendResult, tx.Serialize())
 		}
@@ -174,18 +174,18 @@ func TestP2WPKH(t *testing.T) {
 
 	t.Run("test_siganyonecanpay_all_send", func(t *testing.T) {
 		tx := scripts.NewBtcTransaction(
-			[]scripts.TxInput{*txin1SiganyonecanpayAll},
-			[]scripts.TxOutput{*txout1SiganyonecanpayAll, *txout2SiganyonecanpayAll},
+			[]*scripts.TxInput{txin1SiganyonecanpayAll},
+			[]*scripts.TxOutput{txout1SiganyonecanpayAll, txout2SiganyonecanpayAll},
 			true,
 		)
 		digest := tx.GetTransactionSegwitDigit(0, p2pkhRedeemScript, txin1SiganyonecanpayAllAmount, constant.SIGHASH_ALL|constant.SIGHASH_ANYONECANPAY)
 		sig := sk.SingInput(digest, constant.SIGHASH_ALL|constant.SIGHASH_ANYONECANPAY)
-		witness := scripts.TxWitnessInput{Stack: []string{sig, sk.GetPublic().ToHex()}}
+		witness := scripts.NewTxWitnessInput(sig, sk.GetPublic().ToHex())
 		tx.Witnesses = append(tx.Witnesses, witness)
-		tx.Inputs = append(tx.Inputs, *txin2SiganyonecanpayAll)
+		tx.Inputs = append(tx.Inputs, txin2SiganyonecanpayAll)
 		digit2 := tx.GetTransactionSegwitDigit(1, p2pkhRedeemScript, txin2SiganyonecanpayAllAmount)
 		sig2 := sk.SingInput(digit2)
-		witness2 := scripts.TxWitnessInput{Stack: []string{sig2, sk.GetPublic().ToHex()}}
+		witness2 := scripts.NewTxWitnessInput(sig2, sk.GetPublic().ToHex())
 		tx.Witnesses = append(tx.Witnesses, witness2)
 		if !strings.EqualFold(tx.Serialize(), testSiganyonecanpayAllSendResult) {
 			t.Errorf("Expected %v, but got %v", testSiganyonecanpayAllSendResult, tx.Serialize())
@@ -195,19 +195,19 @@ func TestP2WPKH(t *testing.T) {
 	t.Run("test_siganyonecanpay_none_send", func(t *testing.T) {
 
 		tx := scripts.NewBtcTransaction(
-			[]scripts.TxInput{*txin1SiganyonecanpayNone},
-			[]scripts.TxOutput{*txout1SiganyonecanpayNone},
+			[]*scripts.TxInput{txin1SiganyonecanpayNone},
+			[]*scripts.TxOutput{txout1SiganyonecanpayNone},
 			true,
 		)
 		digest := tx.GetTransactionSegwitDigit(0, p2pkhRedeemScript, txin1SiganyonecanpayNoneAmount, constant.SIGHASH_NONE|constant.SIGHASH_ANYONECANPAY)
 		sig := sk.SingInput(digest, constant.SIGHASH_NONE|constant.SIGHASH_ANYONECANPAY)
-		witness := scripts.TxWitnessInput{Stack: []string{sig, sk.GetPublic().ToHex()}}
+		witness := scripts.NewTxWitnessInput(sig, sk.GetPublic().ToHex())
 		tx.Witnesses = append(tx.Witnesses, witness)
-		tx.Inputs = append(tx.Inputs, *txin2SiganyonecanpayNone)
-		tx.Outputs = append(tx.Outputs, *txout2SiganyonecanpayNone)
+		tx.Inputs = append(tx.Inputs, txin2SiganyonecanpayNone)
+		tx.Outputs = append(tx.Outputs, txout2SiganyonecanpayNone)
 		digit2 := tx.GetTransactionSegwitDigit(1, p2pkhRedeemScript, txin2SiganyonecanpayNoneAmount)
 		sig2 := sk.SingInput(digit2)
-		witness2 := scripts.TxWitnessInput{Stack: []string{sig2, sk.GetPublic().ToHex()}}
+		witness2 := scripts.NewTxWitnessInput(sig2, sk.GetPublic().ToHex())
 		tx.Witnesses = append(tx.Witnesses, witness2)
 		if !strings.EqualFold(tx.Serialize(), testSiganyonecanpayNoneSendResult) {
 
@@ -217,15 +217,15 @@ func TestP2WPKH(t *testing.T) {
 	})
 	t.Run("test_siganyonecanpay_single_send", func(t *testing.T) {
 		tx := scripts.NewBtcTransaction(
-			[]scripts.TxInput{*txin1SiganyonecanpaySingle},
-			[]scripts.TxOutput{*txout1SiganyonecanpaySingle},
+			[]*scripts.TxInput{txin1SiganyonecanpaySingle},
+			[]*scripts.TxOutput{txout1SiganyonecanpaySingle},
 			true,
 		)
 		digest := tx.GetTransactionSegwitDigit(0, p2pkhRedeemScript, txin1SiganyonecanpaySingleAmount, constant.SIGHASH_SINGLE|constant.SIGHASH_ANYONECANPAY)
 		sig := sk.SingInput(digest, constant.SIGHASH_SINGLE|constant.SIGHASH_ANYONECANPAY)
-		witness := scripts.TxWitnessInput{Stack: []string{sig, sk.GetPublic().ToHex()}}
+		witness := scripts.NewTxWitnessInput(sig, sk.GetPublic().ToHex())
 		tx.Witnesses = append(tx.Witnesses, witness)
-		tx.Outputs = append(tx.Outputs, *txout2SiganyonecanpaySingle)
+		tx.Outputs = append(tx.Outputs, txout2SiganyonecanpaySingle)
 		if !strings.EqualFold(tx.Serialize(), testSiganyonecanpaySingleSendResult) {
 			t.Errorf("Expected %v, but got %v", testSiganyonecanpaySingleSendResult, tx.Serialize())
 		}

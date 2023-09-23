@@ -1,6 +1,9 @@
 package scripts
 
-import "bitcoin/constant"
+import (
+	"bitcoin/constant"
+	"fmt"
+)
 
 type Sequence struct {
 	// Specifies the type of sequence (TYPE_RELATIVE_TIMELOCK | TYPE_ABSOLUTE_TIMELOCK | TYPE_REPLACE_BY_FEE
@@ -12,22 +15,22 @@ type Sequence struct {
 }
 
 // NewSequence creates a new Sequence object with the specified sequence type
-func NewSequence(seqType, value int, isTypeBlock bool) *Sequence {
+func NewSequence(seqType, value int, isTypeBlock bool) (*Sequence, error) {
 	if seqType == constant.TYPE_RELATIVE_TIMELOCK && (value < 1 || value > 0xffff) {
-		panic("Sequence should be between 1 and 65535")
+		return nil, fmt.Errorf("Sequence should be between 1 and 65535")
 	}
 
-	return &Sequence{seqType: seqType, value: value, isTypeBlock: isTypeBlock}
+	return &Sequence{seqType: seqType, value: value, isTypeBlock: isTypeBlock}, nil
 }
 
 // Serializes the relative sequence as required in a transaction
-func (s *Sequence) ForInputSequence() []byte {
+func (s *Sequence) ForInputSequence() ([]byte, error) {
 	if s.seqType == constant.TYPE_ABSOLUTE_TIMELOCK {
-		return constant.ABSOLUTE_TIMELOCK_SEQUENCE
+		return constant.ABSOLUTE_TIMELOCK_SEQUENCE, nil
 	}
 
 	if s.seqType == constant.TYPE_REPLACE_BY_FEE {
-		return constant.REPLACE_BY_FEE_SEQUENCE
+		return constant.REPLACE_BY_FEE_SEQUENCE, nil
 	}
 
 	if s.seqType == constant.TYPE_RELATIVE_TIMELOCK {
@@ -41,21 +44,21 @@ func (s *Sequence) ForInputSequence() []byte {
 			byte((seq >> 8) & 0xFF),
 			byte((seq >> 16) & 0xFF),
 			byte((seq >> 24) & 0xFF),
-		}
+		}, nil
 	}
 
-	panic("Invalid seqType")
+	return nil, fmt.Errorf("invalid seqType")
 }
 
 // Returns the appropriate integer for a script; e.g. for relative timelocks
-func (s *Sequence) ForScript() int {
+func (s *Sequence) ForScript() (int, error) {
 	if s.seqType == constant.TYPE_REPLACE_BY_FEE {
-		panic("RBF is not to be included in a script.")
+		return 0, fmt.Errorf("RBF is not to be included in a script")
 	}
 
 	scriptInteger := s.value
 	if s.seqType == constant.TYPE_RELATIVE_TIMELOCK && !s.isTypeBlock {
 		scriptInteger |= 1 << 22
 	}
-	return scriptInteger
+	return scriptInteger, nil
 }

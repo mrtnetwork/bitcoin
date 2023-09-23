@@ -12,7 +12,6 @@ package bip39
 import (
 	"bitcoin/digest"
 	"bitcoin/formating"
-	"errors"
 	"fmt"
 	"strings"
 )
@@ -34,7 +33,7 @@ func deriveChecksumBits(entropy []byte) string {
 // Returns the generated mnemonic and any error encountered during the process.
 func GenerateMnemonic(strength int) (string, error) {
 	if strength%32 != 0 {
-		return "", errors.New("strength must be a multiple of 32")
+		return "", fmt.Errorf("strength must be a multiple of 32")
 	}
 	entropy, err := formating.GenerateRandom(strength / 8)
 	if err != nil {
@@ -102,14 +101,14 @@ func ValidateMnemonic(mnemonic string) bool {
 func MnemonicToEntropy(mnemonic string) ([]byte, error) {
 	words := strings.Fields(mnemonic)
 	if len(words)%3 != 0 {
-		return nil, errors.New("invalid mnemonic")
+		return nil, fmt.Errorf("invalid mnemonic")
 	}
 
 	var bits string
 	for _, word := range words {
 		index := strings.Index(wordlist, word)
 		if index == -1 {
-			return nil, errors.New("invalid mnemonic")
+			return nil, fmt.Errorf("invalid mnemonic")
 		}
 		bits += fmt.Sprintf("%011b", index)
 	}
@@ -130,12 +129,12 @@ func MnemonicToEntropy(mnemonic string) ([]byte, error) {
 	}
 
 	if len(entropyBytes) < 16 || len(entropyBytes) > 32 || len(entropyBytes)%4 != 0 {
-		return nil, errors.New("invalid entropy")
+		return nil, fmt.Errorf("invalid entropy")
 	}
 
 	newChecksumBits := deriveChecksumBits(entropyBytes)
 	if newChecksumBits != checksumBits {
-		return nil, errors.New("invalid mnemonic checksum")
+		return nil, fmt.Errorf("invalid mnemonic checksum")
 	}
 
 	return entropyBytes, nil

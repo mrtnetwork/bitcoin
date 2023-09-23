@@ -4,16 +4,15 @@ import (
 	"bitcoin/constant"
 	"bitcoin/digest"
 	"bitcoin/formating"
-	"math"
 	"math/big"
 )
 
 // Define BtcTransaction struct
 type BtcTransaction struct {
 	//  A list of all the transaction inputs
-	Inputs []TxInput
+	Inputs []*TxInput
 	// A list of all the transaction outputs
-	Outputs []TxOutput
+	Outputs []*TxOutput
 	// The transaction's locktime parameter
 	Locktime []byte
 	// The transaction version
@@ -21,16 +20,16 @@ type BtcTransaction struct {
 	// Specifies a tx that includes segwit inputs
 	HasSegwit bool
 	// The witness structure that corresponds to the inputs
-	Witnesses []TxWitnessInput
+	Witnesses []*TxWitnessInput
 }
 
 // NewBtcTransaction creates a new Bitcoin transaction with the specified inputs, outputs,
 // and optional parameters such as locktime, version, witness inputs, and SegWit flag.
 // It returns a pointer to the initialized BtcTransaction object.
-func NewBtcTransaction(inputs []TxInput, outputs []TxOutput, hasSegwit bool, options ...interface{}) *BtcTransaction {
+func NewBtcTransaction(inputs []*TxInput, outputs []*TxOutput, hasSegwit bool, options ...interface{}) *BtcTransaction {
 	var lock []byte
 	var version []byte
-	w := make([]TxWitnessInput, 0)
+	w := make([]*TxWitnessInput, 0)
 	for _, opt := range options {
 		switch v := opt.(type) {
 		case []byte:
@@ -40,9 +39,12 @@ func NewBtcTransaction(inputs []TxInput, outputs []TxOutput, hasSegwit bool, opt
 				version = v
 			}
 		case []TxWitnessInput:
+			for _, input := range v {
+				w = append(w, &input)
+			}
+		case []*TxWitnessInput:
 			w = append(w, v...)
-		default:
-			panic("invalid Tx Input argruments")
+
 		}
 	}
 	if lock == nil {
@@ -68,19 +70,19 @@ func NewBtcTransaction(inputs []TxInput, outputs []TxOutput, hasSegwit bool, opt
 
 // Deep copy of Transaction
 func (tx *BtcTransaction) Copy() *BtcTransaction {
-	inputsCopy := make([]TxInput, len(tx.Inputs))
+	inputsCopy := make([]*TxInput, len(tx.Inputs))
 	for i, input := range tx.Inputs {
-		inputsCopy[i] = *input.Copy()
+		inputsCopy[i] = input.Copy()
 	}
 
-	outputsCopy := make([]TxOutput, len(tx.Outputs))
+	outputsCopy := make([]*TxOutput, len(tx.Outputs))
 	for i, output := range tx.Outputs {
-		outputsCopy[i] = *output.Copy()
+		outputsCopy[i] = output.Copy()
 	}
 
-	witnessesCopy := make([]TxWitnessInput, len(tx.Witnesses))
+	witnessesCopy := make([]*TxWitnessInput, len(tx.Witnesses))
 	for i, witness := range tx.Witnesses {
-		witnessesCopy[i] = *witness.Copy()
+		witnessesCopy[i] = witness.Copy()
 	}
 
 	return &BtcTransaction{
@@ -109,20 +111,25 @@ func BtcTransactionFromRaw(raw string) (*BtcTransaction, error) {
 	vi, viCursor := formating.ViToInt(rawtx[cursor:])
 	cursor += viCursor
 
-	inputs := make([]TxInput, vi)
+	inputs := make([]*TxInput, vi)
 	for index := 0; index < len(inputs); index++ {
-		inp, inpCursor := TxInputFromRaw(raw, cursor, hasSegwit)
-
-		inputs[index] = *inp
+		inp, inpCursor, err := TxInputFromRaw(raw, cursor, hasSegwit)
+		if err != nil {
+			return nil, err
+		}
+		inputs[index] = inp
 		cursor = inpCursor
 	}
 	viOut, viOutCursor := formating.ViToInt(rawtx[cursor:])
 	cursor += viOutCursor
 
-	outputs := make([]TxOutput, viOut)
+	outputs := make([]*TxOutput, viOut)
 	for index := 0; index < len(outputs); index++ {
-		out, outCursor := TxOutputFromRaw(raw, cursor, hasSegwit)
-		outputs[index] = *out
+		out, outCursor, err := TxOutputFromRaw(raw, cursor, hasSegwit)
+		if err != nil {
+			return nil, err
+		}
+		outputs[index] = out
 		cursor = outCursor
 	}
 	witnesses := make([]TxWitnessInput, len(inputs))
@@ -144,13 +151,7 @@ func BtcTransactionFromRaw(raw string) (*BtcTransaction, error) {
 		}
 	}
 	return NewBtcTransaction(inputs, outputs, hasSegwit, witnesses), nil
-	// return &BtcTransaction{
-	// 	Inputs:    inputs,
-	// 	Outputs:   outputs,
-	// 	Witnesses: witnesses,
-	// 	HasSegwit: hasSegwit,
-	// 	Locktime: lo,
-	// }, nil
+
 }
 
 // Define a BtcTransaction method for converting it to bytes
@@ -203,8 +204,7 @@ func getSigHashArgruments(defaultValue int, args ...interface{}) int {
 		switch v := opt.(type) {
 		case int:
 			sigHash = v
-		default:
-			panic("invalid sighash argruments")
+			return sigHash
 		}
 	}
 	return sigHash
@@ -224,14 +224,14 @@ func getSigHashArgruments(defaultValue int, args ...interface{}) int {
 // script : The scriptPubKey of the UTXO that we want to spend
 // sighash : The type of the signature hash to be created
 
-func (tx *BtcTransaction) GetTransactionDigest(txInIndex int, script Script, sighash ...interface{}) []byte {
+func (tx *BtcTransaction) GetTransactionDigest(txInIndex int, script *Script, sighash ...interface{}) []byte {
 	sig := getSigHashArgruments(constant.SIGHASH_ALL, sighash...)
 	// Make a copy of the transaction
 	txCopy := tx.Copy()
 
 	// Set scriptSig for all inputs except the specified one
 	for i := range txCopy.Inputs {
-		txCopy.Inputs[i].ScriptSig = Script{Script: []interface{}{}}
+		txCopy.Inputs[i].ScriptSig = NewScript()
 	}
 	txCopy.Inputs[txInIndex].ScriptSig = script
 
@@ -257,9 +257,9 @@ func (tx *BtcTransaction) GetTransactionDigest(txInIndex int, script Script, sig
 
 		// Fill in with dummy outputs
 		for i := 0; i < txInIndex; i++ {
-			txCopy.Outputs[i] = TxOutput{
+			txCopy.Outputs[i] = &TxOutput{
 				Amount:       big.NewInt(constant.NEGATIVE_SATOSHI),
-				ScriptPubKey: Script{},
+				ScriptPubKey: NewScript(),
 			}
 
 		}
@@ -274,7 +274,7 @@ func (tx *BtcTransaction) GetTransactionDigest(txInIndex int, script Script, sig
 
 	if sig&constant.SIGHASH_ANYONECANPAY != 0 {
 		input := txCopy.Inputs[txInIndex]
-		txCopy.Inputs = []TxInput{input}
+		txCopy.Inputs = []*TxInput{input}
 	}
 
 	// Serialize the transaction without SegWit data
@@ -306,7 +306,7 @@ func (tx *BtcTransaction) GetTransactionDigest(txInIndex int, script Script, sig
 // signature for segwit (in satoshis)
 // sighash : The type of the signature hash to be created
 
-func (tx *BtcTransaction) GetTransactionSegwitDigit(txInIndex int, script Script, amount *big.Int, sigshash ...interface{}) []byte {
+func (tx *BtcTransaction) GetTransactionSegwitDigit(txInIndex int, script *Script, amount *big.Int, sigshash ...interface{}) []byte {
 	sig := getSigHashArgruments(constant.SIGHASH_ALL, sigshash...)
 	// Make a copy of the transaction
 	txCopy := tx.Copy()
@@ -416,7 +416,7 @@ func (tx *BtcTransaction) GetTransactionSegwitDigit(txInIndex int, script Script
 // script : The script that we are spending (ext_flag=1)
 // leaf_ver : The script version, LEAF_VERSION_TAPSCRIPT for the default tapscript
 // sighash : The type of the signature hash to be created
-func (tx *BtcTransaction) GetTransactionTaprootDigest(txIndex int, scriptPubKeys []Script, amounts []*big.Int, extFlags int, script Script, leafVar int, sighash int) []byte {
+func (tx *BtcTransaction) GetTransactionTaprootDigest(txIndex int, scriptPubKeys []*Script, amounts []*big.Int, extFlags int, script *Script, sighash int) []byte {
 	newTx := tx.Copy()
 	sighashNone := (sighash & 0x03) == constant.SIGHASH_NONE
 	sighashSingle := (sighash & 0x03) == constant.SIGHASH_SINGLE
@@ -516,8 +516,8 @@ func (tx *BtcTransaction) GetTransactionTaprootDigest(txIndex int, scriptPubKeys
 	}
 
 	if extFlags == 1 {
-		leafVar = constant.LEAF_VERSION_TAPSCRIPT
-		leafVarBytes := append([]byte{byte(leafVar)}, formating.PrependVarint(script.ToBytes())...)
+
+		leafVarBytes := append([]byte{byte(constant.LEAF_VERSION_TAPSCRIPT)}, formating.PrependVarint(script.ToBytes())...)
 		txForSign = append(txForSign, digest.TaggedHash(leafVarBytes, "TapLeaf")...)
 		txForSign = append(txForSign, 0)
 		txForSign = append(txForSign, []byte{0xFF, 0xFF, 0xFF, 0xFF}...)
@@ -573,7 +573,7 @@ func (tx *BtcTransaction) GetVSize() int {
 	witSize = len(data)
 	size := tx.GetSize() - (markerSize + witSize)
 	vSize := float64(size + (markerSize+witSize)/4)
-	return int(math.Ceil(vSize))
+	return int(vSize)
 }
 
 // Hashes the serialized (bytes) tx including segwit marker and witnesses"
@@ -590,6 +590,6 @@ func (tx *BtcTransaction) GetWTXID() string {
 }
 
 // SetScriptSig sets the script signature for the transaction input at the specified index.
-func (tx *BtcTransaction) SetScriptSig(index int, script Script) {
+func (tx *BtcTransaction) SetScriptSig(index int, script *Script) {
 	tx.Inputs[index].ScriptSig = script
 }

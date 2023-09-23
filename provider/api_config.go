@@ -1,4 +1,4 @@
-package builder
+package provider
 
 import (
 	"bitcoin/address"
@@ -16,6 +16,7 @@ type aPIConfig struct {
 	URL             string
 	FeeRate         string
 	Transaction     string
+	Transactions    string
 	SendTransaction string
 	ApiType         APIType
 	Network         address.Network
@@ -44,6 +45,7 @@ func createMempolApi(network address.NetworkInfo) *aPIConfig {
 		Transaction:     baseUrl + "/tx/###",
 		SendTransaction: baseUrl + "/tx",
 		ApiType:         MempoolApi,
+		Transactions:    baseUrl + "/address/###/txs",
 		Network:         network.Network(),
 	}
 }
@@ -58,11 +60,18 @@ func createBlockCyperApi(network address.NetworkInfo) *aPIConfig {
 		FeeRate:         baseUrl,
 		Transaction:     baseUrl + "/txs/###",
 		SendTransaction: baseUrl + "/txs/push",
+		Transactions:    baseUrl + "/addrs/###/full?limit=200",
 		ApiType:         BlockCyperApi,
 		Network:         network.Network(),
 	}
 }
 
+// SelectApi chooses and returns the appropriate API configuration based on the given APIType
+// and network information.
+//
+// Parameters:
+// - apitype: The APIType representing the desired API.
+// - network: The address.NetworkInfo providing network-specific details.
 func SelectApi(apitype APIType, network address.NetworkInfo) *aPIConfig {
 	switch apitype {
 	case MempoolApi:
@@ -75,14 +84,19 @@ func SelectApi(apitype APIType, network address.NetworkInfo) *aPIConfig {
 		}
 	}
 }
+
+// Return UTXO url contains address
 func (api *aPIConfig) GetUtxoUrl(address string) string {
 	baseUrl := api.URL
 	return strings.Replace(baseUrl, "###", address, -1)
 }
+
+// Return Network Fee api url contains address
 func (api *aPIConfig) GetFeeApiUrl() string {
 	return api.FeeRate
 }
 
+// get current network of api
 func (api *aPIConfig) GetNetwork() address.NetworkInfo {
 	switch api.Network {
 	case address.Mainnet:
@@ -95,6 +109,20 @@ func (api *aPIConfig) GetNetwork() address.NetworkInfo {
 		}
 	}
 }
+
+// get send transaction url
 func (api *aPIConfig) GetSendTransactionUrl() string {
 	return api.SendTransaction
+}
+
+// get transaction url contains hash
+func (api *aPIConfig) GetTransactionUrl(transactionId string) string {
+	baseUrl := api.Transaction
+	return strings.Replace(baseUrl, "###", transactionId, -1)
+}
+
+// get account transaction url contains address
+func (api *aPIConfig) GetTransactionsUrl(address string) string {
+	baseUrl := api.Transactions
+	return strings.Replace(baseUrl, "###", address, -1)
 }

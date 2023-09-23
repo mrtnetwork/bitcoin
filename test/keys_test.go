@@ -22,7 +22,7 @@ func TestPrivateKeys(t *testing.T) {
 	}
 
 	t.Run("test1", func(t *testing.T) {
-		p := keypair.NewECPrivateFromWIF(keyWifc)
+		p, _ := keypair.NewECPrivateFromWIF(keyWifc)
 		if !bytes.Equal(p.ToBytes(), keyBytes) {
 			t.Errorf("Expected %v, but got %v", keyBytes, p.ToBytes())
 		}
@@ -33,7 +33,7 @@ func TestPrivateKeys(t *testing.T) {
 }
 func TestSignAndVerify(t *testing.T) {
 	message := "The test!"
-	keyWifC := keypair.NewECPrivateFromWIF("KwDiBf89QgGbjEhKnhXJuH7LrciVrZi3qYjgd9M7rFU73sVHnoWn")
+	keyWifC, _ := keypair.NewECPrivateFromWIF("KwDiBf89QgGbjEhKnhXJuH7LrciVrZi3qYjgd9M7rFU73sVHnoWn")
 	pub := keyWifC.GetPublic()
 	deterministicSignature := "204890ee41df1aa9711d239c51fb73478802863ba925bb882090a26372ebc90f525f03de46806d25892b35dfeb814ed13fd8d7ea2d8868619830bb7d6d6fbf6db2"
 	t.Run("getpublic", func(t *testing.T) {
@@ -65,11 +65,11 @@ func TestPublicKeys(t *testing.T) {
 	}
 
 	t.Run("test1", func(t *testing.T) {
-		p := keypair.NewECPPublicFromHex(publicKeyHex)
-		if !bytes.Equal(p.ToUnCompressedBytes(false), publicKeyBytes) {
+		p, e := keypair.NewECPPublicFromHex(publicKeyHex)
+		if e != nil || !bytes.Equal(p.ToUnCompressedBytes(false), publicKeyBytes) {
 			t.Errorf("Expected %v, but got %v", publicKeyBytes, p.ToUnCompressedBytes(false))
 		}
-		if !strings.EqualFold(p.ToAddress(false).Show(address.MainnetNetwork), unCompressedAddress) {
+		if e != nil || !strings.EqualFold(p.ToAddress(false).Show(address.MainnetNetwork), unCompressedAddress) {
 			t.Errorf("Expected %v, but got %v", unCompressedAddress, p.ToAddress(false).Show(address.MainnetNetwork))
 		}
 	})
@@ -81,8 +81,8 @@ func TestP2pkhAddresses(t *testing.T) {
 	address1 := "1EHNa6Q4Jz2uvNExL497mE43ikXhwF6kZm"
 	addressc := "1BgGZ9tcN4rm9KBzDn7KprQz87SZ26SAMH"
 
-	p1 := address.P2PKHAddressFromHash160(hash160)
-	p2 := address.P2PKHAddressFromHash160(hash160c)
+	p1, _ := address.P2PKHAddressFromHash160(hash160)
+	p2, _ := address.P2PKHAddressFromHash160(hash160c)
 	if !strings.EqualFold(p1.Show(address.MainnetNetwork), address1) {
 		t.Errorf("Expected %v, but got %v", address1, p1.Show(address.MainnetNetwork))
 	}
@@ -97,12 +97,12 @@ func TestP2pkhAddresses(t *testing.T) {
 	}
 }
 func TestP2SHhAddresses(t *testing.T) {
-	prive := keypair.NewECPrivateFromWIF("cTALNpTpRbbxTCJ2A5Vq88UxT44w1PE2cYqiB3n4hRvzyCev1Wwo")
+	prive, _ := keypair.NewECPrivateFromWIF("cTALNpTpRbbxTCJ2A5Vq88UxT44w1PE2cYqiB3n4hRvzyCev1Wwo")
 	pub := prive.GetPublic()
 	p2shaddress := "2NDkr9uD2MSY5em3rsjkff8fLZcJzCfY3W1"
 	t.Run("test_create", func(t *testing.T) {
 		script := scripts.NewScript(pub.ToHex(), "OP_CHECKSIG")
-		addr := address.P2SHAddressFromScript(*script, address.P2PKInP2SH)
+		addr, _ := address.P2SHAddressFromScript(script, address.P2PKInP2SH)
 		if !strings.EqualFold(addr.Show(address.TestnetNetwork), p2shaddress) {
 			t.Errorf("Expected %v, but got %v", p2shaddress, addr.Show(address.TestnetNetwork))
 		}
@@ -110,7 +110,7 @@ func TestP2SHhAddresses(t *testing.T) {
 	t.Run("p2sh_to_script", func(t *testing.T) {
 		script := scripts.NewScript(pub.ToHex(), "OP_CHECKSIG")
 		fromScript := script.ToP2shScriptPubKey().ToHex()
-		addr := address.P2SHAddressFromScript(*script, address.P2PKInP2SH)
+		addr, _ := address.P2SHAddressFromScript(script, address.P2PKInP2SH)
 		fromP2shAddress := addr.Program().ToScriptPubKey()
 		if !strings.EqualFold(addr.Show(address.TestnetNetwork), p2shaddress) {
 			t.Errorf("Expected %v, but got %v", p2shaddress, addr.Show(address.TestnetNetwork))
@@ -121,7 +121,7 @@ func TestP2SHhAddresses(t *testing.T) {
 	})
 }
 func TestP2WPKHADDRESS(t *testing.T) {
-	priv := keypair.NewECPrivateFromWIF("cVdte9ei2xsVjmZSPtyucG43YZgNkmKTqhwiUA8M4Fc3LdPJxPmZ")
+	priv, _ := keypair.NewECPrivateFromWIF("cVdte9ei2xsVjmZSPtyucG43YZgNkmKTqhwiUA8M4Fc3LdPJxPmZ")
 	pub := priv.GetPublic()
 	correctP2wpkhAddress :=
 		"tb1qxmt9xgewg6mxc4mvnzvrzu4f2v0gy782fydg0w"
@@ -132,31 +132,32 @@ func TestP2WPKHADDRESS(t *testing.T) {
 	correctP2shP2wshAddress :=
 		"2NC2DBZd3WfEF9cZcpBRDYxCTGCVCfPUf7Q"
 	t.Run("test1", func(t *testing.T) {
-		addr := address.P2WPKHAddresssFromProgram(pub.ToSegwitAddress().Program().Program)
+		addr, _ := address.P2WPKHAddresssFromProgram(pub.ToSegwitAddress().Program().Program)
 		if !strings.EqualFold(correctP2wpkhAddress, addr.Show(address.TestnetNetwork)) {
 			t.Errorf("Expected %v, but got %v", correctP2wpkhAddress, addr.Show(address.TestnetNetwork))
 		}
 	})
 	t.Run("test2", func(t *testing.T) {
-		addr := keypair.NewECPrivateFromWIF("cTmyBsxMQ3vyh4J3jCKYn2Au7AhTKvqeYuxxkinsg6Rz3BBPrYKK").GetPublic().ToSegwitAddress()
-		p2sh := address.P2SHAddressFromScript(addr.Program().ToScriptPubKey(), address.P2WPKHInP2SH)
+		addr, _ := keypair.NewECPrivateFromWIF("cTmyBsxMQ3vyh4J3jCKYn2Au7AhTKvqeYuxxkinsg6Rz3BBPrYKK")
+		p2sh, _ := address.P2SHAddressFromScript(addr.GetPublic().ToSegwitAddress().Program().ToScriptPubKey(), address.P2WPKHInP2SH)
 		if !strings.EqualFold(correctP2shP2wpkhAddress, p2sh.Show(address.TestnetNetwork)) {
 			t.Errorf("Expected %v, but got %v", correctP2shP2wpkhAddress, p2sh.Show(address.TestnetNetwork))
 		}
 	})
 	t.Run("test3", func(t *testing.T) {
-		newPrivate := keypair.NewECPrivateFromWIF("cNn8itYxAng4xR4eMtrPsrPpDpTdVNuw7Jb6kfhFYZ8DLSZBCg37")
+		newPrivate, _ := keypair.NewECPrivateFromWIF("cNn8itYxAng4xR4eMtrPsrPpDpTdVNuw7Jb6kfhFYZ8DLSZBCg37")
 		script := scripts.NewScript("OP_1", newPrivate.GetPublic().ToHex(), "OP_1", "OP_CHECKMULTISIG")
-		p2wsh := address.P2WSHAddresssFromScript(*script)
-		if !strings.EqualFold(correctP2wshAddress, p2wsh.Show(address.TestnetNetwork)) {
-			t.Errorf("Expected %v, but got %v", correctP2wshAddress, p2wsh.Show(address.TestnetNetwork))
+		p2wsh, _ := address.P2WSHAddresssFromScript(script)
+		addr := p2wsh.Show(address.TestnetNetwork)
+		if !strings.EqualFold(correctP2wshAddress, addr) {
+			t.Errorf("Expected %v, but got %v", correctP2wshAddress, addr)
 		}
 	})
 	t.Run("test4", func(t *testing.T) {
-		newPrivate := keypair.NewECPrivateFromWIF("cNn8itYxAng4xR4eMtrPsrPpDpTdVNuw7Jb6kfhFYZ8DLSZBCg37")
+		newPrivate, _ := keypair.NewECPrivateFromWIF("cNn8itYxAng4xR4eMtrPsrPpDpTdVNuw7Jb6kfhFYZ8DLSZBCg37")
 		script := scripts.NewScript("OP_1", newPrivate.GetPublic().ToHex(), "OP_1", "OP_CHECKMULTISIG")
-		p2wsh := address.P2WSHAddresssFromScript(*script)
-		p2sh := address.P2SHAddressFromScript(p2wsh.Program().ToScriptPubKey(), address.P2WSHInP2SH)
+		p2wsh, _ := address.P2WSHAddresssFromScript(script)
+		p2sh, _ := address.P2SHAddressFromScript(p2wsh.Program().ToScriptPubKey(), address.P2WSHInP2SH)
 		if !strings.EqualFold(correctP2shP2wshAddress, p2sh.Show(address.TestnetNetwork)) {
 			t.Errorf("Expected %v, but got %v", correctP2shP2wshAddress, p2sh.Show(address.TestnetNetwork))
 		}
@@ -164,8 +165,8 @@ func TestP2WPKHADDRESS(t *testing.T) {
 
 }
 func TestP2trAddresses(t *testing.T) {
-	privEven := keypair.NewECPrivateFromWIF("cTLeemg1bCXXuRctid7PygEn7Svxj4zehjTcoayrbEYPsHQo248w")
-	privOdd := keypair.NewECPrivateFromWIF("cRPxBiKrJsH94FLugmiL4xnezMyoFqGcf4kdgNXGuypNERhMK6AT")
+	privEven, _ := keypair.NewECPrivateFromWIF("cTLeemg1bCXXuRctid7PygEn7Svxj4zehjTcoayrbEYPsHQo248w")
+	privOdd, _ := keypair.NewECPrivateFromWIF("cRPxBiKrJsH94FLugmiL4xnezMyoFqGcf4kdgNXGuypNERhMK6AT")
 
 	correctEvenPk :=
 		"0271fe85f75e97d22e74c2dd6425e843def8b662b928f24f724ae6a2fd0c4e0419"

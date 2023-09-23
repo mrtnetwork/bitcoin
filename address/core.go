@@ -6,7 +6,7 @@ type AddressType int
 
 // address access interface in multiple structs
 type BitcoinAddress interface {
-	ToScriptPubKey() scripts.Script
+	ToScriptPubKey() *scripts.Script
 	Show(network ...interface{}) string
 	GetType() AddressType
 }
@@ -257,7 +257,7 @@ func (b LegacyAddress) toScriptPubKey() []string {
   associated with the output of a Bitcoin transaction
   and is used to lock the funds until the specified conditions are met.
 */
-func (segwit SegwitAddress) ToScriptPubKey() scripts.Script {
+func (segwit SegwitAddress) ToScriptPubKey() *scripts.Script {
 	return scripts.ToScript(segwit.toScriptPubKey())
 }
 
@@ -269,7 +269,7 @@ func (segwit SegwitAddress) ToScriptPubKey() scripts.Script {
   associated with the output of a Bitcoin transaction
   and is used to lock the funds until the specified conditions are met.
 */
-func (b LegacyAddress) ToScriptPubKey() scripts.Script {
+func (b LegacyAddress) ToScriptPubKey() *scripts.Script {
 	return scripts.ToScript(b.toScriptPubKey())
 }
 
@@ -337,7 +337,7 @@ func (s P2PKHAddress) Show(network ...interface{}) string {
   associated with the output of a Bitcoin transaction
   and is used to lock the funds until the specified conditions are met.
 */
-func (s P2TRAddress) ToScriptPubKey() scripts.Script {
+func (s P2TRAddress) ToScriptPubKey() *scripts.Script {
 	return s.AddressProgram.ToScriptPubKey()
 }
 
@@ -349,7 +349,7 @@ func (s P2TRAddress) ToScriptPubKey() scripts.Script {
   associated with the output of a Bitcoin transaction
   and is used to lock the funds until the specified conditions are met.
 */
-func (s P2WPKHAddresss) ToScriptPubKey() scripts.Script {
+func (s P2WPKHAddresss) ToScriptPubKey() *scripts.Script {
 	return s.AddressProgram.ToScriptPubKey()
 }
 
@@ -361,7 +361,7 @@ func (s P2WPKHAddresss) ToScriptPubKey() scripts.Script {
   associated with the output of a Bitcoin transaction
   and is used to lock the funds until the specified conditions are met.
 */
-func (s P2WSHAddresss) ToScriptPubKey() scripts.Script {
+func (s P2WSHAddresss) ToScriptPubKey() *scripts.Script {
 	return s.AddressProgram.ToScriptPubKey()
 }
 
@@ -373,7 +373,7 @@ func (s P2WSHAddresss) ToScriptPubKey() scripts.Script {
   associated with the output of a Bitcoin transaction
   and is used to lock the funds until the specified conditions are met.
 */
-func (s P2SHAdress) ToScriptPubKey() scripts.Script {
+func (s P2SHAdress) ToScriptPubKey() *scripts.Script {
 	return s.AddressProgram.ToScriptPubKey()
 }
 
@@ -385,7 +385,7 @@ func (s P2SHAdress) ToScriptPubKey() scripts.Script {
   associated with the output of a Bitcoin transactionf
   and is used to lock the funds until the specified conditions are met.
 */
-func (s P2PKAddress) ToScriptPubKey() scripts.Script {
+func (s P2PKAddress) ToScriptPubKey() *scripts.Script {
 	return s.AddressProgram.ToScriptPubKey()
 }
 
@@ -397,7 +397,7 @@ func (s P2PKAddress) ToScriptPubKey() scripts.Script {
   associated with the output of a Bitcoin transaction
   and is used to lock the funds until the specified conditions are met.
 */
-func (s P2PKHAddress) ToScriptPubKey() scripts.Script {
+func (s P2PKHAddress) ToScriptPubKey() *scripts.Script {
 	return s.AddressProgram.ToScriptPubKey()
 }
 

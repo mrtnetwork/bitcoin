@@ -2,11 +2,10 @@ package example
 
 import (
 	"bitcoin/address"
-	"bitcoin/builder"
 	"bitcoin/constant"
 	hdwallet "bitcoin/hd_wallet"
 	"bitcoin/keypair"
-	"errors"
+	"bitcoin/provider"
 	"fmt"
 	"math/big"
 )
@@ -14,7 +13,7 @@ import (
 // spend from 8 different address type to 10 different output
 func ExampleSpendingFrom8InputTo10Output() {
 	network := address.TestnetNetwork
-	api := builder.SelectApi(builder.MempoolApi, &network)
+	api := provider.SelectApi(provider.MempoolApi, &network)
 	// i generate random mnemonic for test
 	// mnemoic, _ := bip39.GenerateMnemonic(256)
 	mnemonic := "spy often critic spawn produce volcano depart fire theory fog turn retire"
@@ -30,10 +29,10 @@ func ExampleSpendingFrom8InputTo10Output() {
 	sp4, _ := hdwallet.DrivePath(masterWallet, "m/44'/0'/0'/0/0/4")
 
 	// access to private key `ECPrivate`
-	private1 := sp1.GetPrivate()
-	private2 := sp2.GetPrivate()
-	private3 := sp3.GetPrivate()
-	private4 := sp4.GetPrivate()
+	private1, _ := sp1.GetPrivate()
+	private2, _ := sp2.GetPrivate()
+	private3, _ := sp3.GetPrivate()
+	private4, _ := sp4.GetPrivate()
 	// access to public key `ECPublic`
 	public1 := sp1.GetPublic()
 	public2 := sp2.GetPublic()
@@ -96,7 +95,7 @@ func ExampleSpendingFrom8InputTo10Output() {
 
 	// now we chose some address for spending from multiple address
 	// i use some different address type for this
-	spenders := []builder.UtxoOwnerDetails{
+	spenders := []provider.UtxoOwnerDetails{
 		{PublicKey: public1.ToHex(), Address: exampleAddr1}, // p2pkh address from public1
 		{PublicKey: public2.ToHex(), Address: exampleAddr2}, // P2TRAddress address from public2
 		{PublicKey: public3.ToHex(), Address: exampleAddr7}, // P2SH(P2WPKH) address from public3
@@ -113,13 +112,13 @@ func ExampleSpendingFrom8InputTo10Output() {
 
 	// ok i got faucet
 	// i need now to read spenders account UTXOS
-	utxos := builder.UtxoWithOwnerList{}
+	utxos := provider.UtxoWithOwnerList{}
 
 	// i add some method for provider to read utxos from mempol or blockCypher
 	// looping address to read Utxos
 	for _, spender := range spenders {
 		// read ech address utxo from mempol
-		spenderUtxos, err := api.GetUtxo(spender)
+		spenderUtxos, err := api.GetAccountUtxo(spender)
 
 		// oh this address does not have any satoshi for spending
 		if !spenderUtxos.CanSpending() {
@@ -155,54 +154,54 @@ func ExampleSpendingFrom8InputTo10Output() {
 	// now we have 1,767,320 for spending let do it
 	// we create 8 different output with  different address type like (pt2r,p2sh(p2wpkh),p2sh(p2wsh),p2sh(p2pkh),p2sh(p2pk),p2pkh,p2wph,p2wsh and etc..)
 	// We consider the spendable amount for 10 outputs and divide by 10, each output 176,732
-	output1 := builder.BitcoinOutputDetails{
+	output1 := provider.BitcoinOutputDetails{
 		Address: exampleAddr4,
 		Value:   big.NewInt(176732),
 	}
-	output2 := builder.BitcoinOutputDetails{
+	output2 := provider.BitcoinOutputDetails{
 		Address: exampleAddr9,
 		Value:   big.NewInt(176732),
 	}
-	output3 := builder.BitcoinOutputDetails{
+	output3 := provider.BitcoinOutputDetails{
 		Address: exampleAddr10,
 		Value:   big.NewInt(176732),
 	}
-	output4 := builder.BitcoinOutputDetails{
+	output4 := provider.BitcoinOutputDetails{
 		Address: exampleAddr1,
 		Value:   big.NewInt(176732),
 	}
-	output5 := builder.BitcoinOutputDetails{
+	output5 := provider.BitcoinOutputDetails{
 		Address: exampleAddr3,
 		Value:   big.NewInt(176732),
 	}
-	output6 := builder.BitcoinOutputDetails{
+	output6 := provider.BitcoinOutputDetails{
 		Address: exampleAddr2,
 		Value:   big.NewInt(176732),
 	}
-	output7 := builder.BitcoinOutputDetails{
+	output7 := provider.BitcoinOutputDetails{
 		Address: exampleAddr7,
 		Value:   big.NewInt(176732),
 	}
-	output8 := builder.BitcoinOutputDetails{
+	output8 := provider.BitcoinOutputDetails{
 		Address: exampleAddr8,
 		Value:   big.NewInt(176732),
 	}
-	output9 := builder.BitcoinOutputDetails{
+	output9 := provider.BitcoinOutputDetails{
 		Address: exampleAddr5,
 		Value:   big.NewInt(176732),
 	}
-	output10 := builder.BitcoinOutputDetails{
+	output10 := provider.BitcoinOutputDetails{
 		Address: exampleAddr6,
 		Value:   big.NewInt(176732),
 	}
 
 	// Well, now it is clear to whom we are going to pay the amount
 	// Now let's create the transaction
-	transactionBuilder := builder.NewBitcoinTransactionBuilder(
+	transactionBuilder := provider.NewBitcoinTransactionBuilder(
 		// Now, we provide the UTXOs we want to spend.
 		utxos,
 		// We select transaction outputs
-		[]builder.BitcoinOutputDetails{output1, output2, output3, output4, output5, output6, output7, output8, output9, output10},
+		[]provider.BitcoinOutputDetails{output1, output2, output3, output4, output5, output6, output7, output8, output9, output10},
 		/*
 			Transaction fee
 			Ensure that you have accurately calculated the amounts.
@@ -242,7 +241,7 @@ func ExampleSpendingFrom8InputTo10Output() {
 	// Common sighash types include SIGHASH_ALL, SIGHASH_SINGLE, SIGHASH_ANYONECANPAY, etc.
 	// This TransactionBuilder only works with SIGHASH_ALL and TAPROOT_SIGHASH_ALL for taproot input
 	// If you want to use another sighash, you should create another TransactionBuilder
-	transaction, err := transactionBuilder.BuildTransaction(func(trDigest []byte, utxo builder.UtxoWithOwner, multiSigPublicKey string) (string, error) {
+	transaction, err := transactionBuilder.BuildTransaction(func(trDigest []byte, utxo provider.UtxoWithOwner, multiSigPublicKey string) (string, error) {
 		var key keypair.ECPrivate
 
 		currentPublicKey := utxo.OwnerDetails.PublicKey
@@ -270,7 +269,7 @@ func ExampleSpendingFrom8InputTo10Output() {
 			}
 		default:
 			{
-				return "", errors.New("cannot find private key")
+				return "", fmt.Errorf("cannot find private key")
 			}
 		}
 		// Ok, now we have the private key, we need to check which method to use for signing
