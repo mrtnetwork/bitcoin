@@ -324,9 +324,10 @@ func P2PKAddressFromPublicKey(public string) (*P2PKAddress, error) {
 }
 
 /*
-returns the address's string encoding (Bech32)
-You can use NetworkParams or NetworkInfo (TestnetNetwork, BitcoinNetwork) in arguments
-to select the network, otherwise, the default network is used.
+toAddress generates a Bitcoin legacy address from the given hash160 and address type.
+You can specify the desired Bitcoin network by passing network parameters.
+Supported address types are P2PKH, P2PK, and P2SH.
+The method calculates the address checksum and returns the Base58-encoded Bitcoin legacy address.
 */
 func (s LegacyAddress) toAddress(network ...interface{}) string {
 	networkType := getNetworkParams(true, network...)

@@ -274,54 +274,42 @@ func (b LegacyAddress) ToScriptPubKey() *scripts.Script {
 }
 
 /*
-returns the address's string encoding (Bech32)
-You can use NetworkParams or NetworkInfo (TestnetNetwork, BitcoinNetwork) in arguments
-to select the network, otherwise, the default network is used.
+address string encoded in the Bech32 format.
 */
 func (s P2TRAddress) Show(network ...interface{}) string {
 	return s.AddressProgram.toAddress(network...)
 }
 
 /*
-returns the address's string encoding (Bech32)
-You can use NetworkParams or NetworkInfo (TestnetNetwork, BitcoinNetwork) in arguments
-to select the network, otherwise, the default network is used.
+address string encoded in the Bech32 format.
 */
 func (s P2WPKHAddresss) Show(network ...interface{}) string {
 	return s.AddressProgram.toAddress(network...)
 }
 
 /*
-returns the address's string encoding (Bech32)
-You can use NetworkParams or NetworkInfo (TestnetNetwork, BitcoinNetwork) in arguments
-to select the network, otherwise, the default network is used.
+address string encoded in the Bech32 format.
 */
 func (s P2WSHAddresss) Show(network ...interface{}) string {
 	return s.AddressProgram.toAddress(network...)
 }
 
 /*
-returns the address's hash160 hex string representation
-You can use NetworkParams or NetworkInfo (TestnetNetwork, BitcoinNetwork) in arguments
-to select the network, otherwise, the default network is used.
+The method calculates the address checksum and returns the Base58-encoded Bitcoin legacy address.
 */
 func (s P2SHAdress) Show(network ...interface{}) string {
 	return s.AddressProgram.toAddress(network...)
 }
 
 /*
-returns the address's hash160 hex string representation
-You can use NetworkParams or NetworkInfo (TestnetNetwork, BitcoinNetwork) in arguments
-to select the network, otherwise, the default network is used.
+The method calculates the address checksum and returns the Base58-encoded Bitcoin legacy address.
 */
 func (s P2PKAddress) Show(network ...interface{}) string {
 	return s.AddressProgram.toAddress(network...)
 }
 
 /*
-returns the address's hash160 hex string representation
-You can use NetworkParams or NetworkInfo (TestnetNetwork, BitcoinNetwork) in arguments
-to select the network, otherwise, the default network is used.
+The method calculates the address checksum and returns the Base58-encoded Bitcoin legacy address.
 */
 func (s P2PKHAddress) Show(network ...interface{}) string {
 	return s.AddressProgram.toAddress(network...)

@@ -123,10 +123,11 @@ func (ecPriv *ECPrivate) GetPublic() *ECPublic {
 	return pub
 }
 
-// SignTaprootTransaction signs a transaction digest using the ECPrivate key,
-// specified signature hash type, and additional scripts. If 'tweak' is true,
-// the private key may be tweaked before signing. Returns the resulting signature
-// as a string.
+// Taproot uses Schnorr signatures. The format is just R and S so only
+// 64 bytes. If SIGHASH_ALL then nothing is included (i.e. default).
+// If another sighash then it is included in the end (65 bytes).
+// Note that when signing for script path (tapleafs) we typically won't
+// use tweaking so tweak should be set to False
 func (ecPriv *ECPrivate) SignTaprootTransaction(txDigest []byte, sigHash int, scripts []interface{}, tweak bool) string {
 	var keyBytes []byte
 	if tweak {
