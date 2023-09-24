@@ -123,6 +123,57 @@ At least one example has been created for each transaction type, which you can f
 	// Verify verifies a signature against a message
 	verify := publicKey.Verify()
   ```
+- Addresses
+  ```
+  // The `...FromAddress` methods only check the address and return an error if it does not belong to Bitcoin.
+  // If you also want to verify that the address belongs to a specific network,
+  // please select the desired network using the parameters.
+
+  // Generate a Pay-to-Public-Key-Hash (P2PKH) address from the public key.
+  p2pkh, _ := address.P2PKHAddressFromAddress("1Q5odQtVCc4PDmP5ncrp7DSuVbh2ML4Gnb", network)
+
+  // Generate a Pay-to-Witness-Public-Key-Hash (P2WPKH) Segregated Witness (SegWit) address from the public key.
+  p2wpkh, _ := address.P2WPKHAddresssFromAddress("bc1ql5eh45als8sgdkt2drsl344q55g03sj2u9enzz")
+
+  // Generate a Pay-to-Witness-Script-Hash (P2WSH) Segregated Witness (SegWit) address from the public key.
+  p2wsh, _ := address.P2WSHAddresssFromAddress("bc1qf90kcg2ktg0wm983cyvhy0jsrj2fmqz26ugf5jz3uw68mtnr8ljsnf8pqe")
+
+  // Generate a Taproot address from the public key.
+  p2tr, _ := address.P2TRAddressFromAddress("bc1pmelvn3xz2n3dmcsvk2k99na7kc55ry77zmhg4z39upry05myjthq37f6jk")
+
+  // Generate a Pay-to-Public-Key-Hash (P2PKH) inside Pay-to-Script-Hash (P2SH) address from the public key.
+  p2pkhInP2sh, _ := address.P2SHAddressFromAddress("3HDtvvRMu3yKGFXYFSubTspbhbLagpdKJ7")
+
+  // Generate a Pay-to-Witness-Public-Key-Hash (P2WPKH) inside Pay-to-Script-Hash (P2SH) address from the public key.
+  p2wpkhInP2sh, _ := address.P2SHAddressFromAddress("36Dq32LRMW8EJyD3T2usHaxeMBmUpsXhq2")
+
+  // Generate a Pay-to-Witness-Script-Hash (P2WSH) inside Pay-to-Script-Hash (P2SH) address from the public key.
+  p2wshInP2sh, _ := address.P2SHAddressFromAddress("3PPL49fMytbEKJsjjPnkfWh3iWzrZxQZAg")
+
+  // Generate a Pay-to-Public-Key (P2PK) inside Pay-to-Script-Hash (P2SH) address from the public key.
+  p2pkInP2sh, _ := address.P2SHAddressFromAddress("3NCe6AGzjz2jSyRKCc8o3Bg5MG6pUM92bg")
+
+  // You can create any type of Bitcoin address with scripts.
+  // Create an address with scripts for P2WSH multisig 3-of-5.
+  newScript := scripts.NewScript("OP_3", publicKey.ToHex(true), publicKey.ToHex(true), publicKey.ToHex(true), publicKey.ToHex(true), publicKey.ToHex(true), "OP_5", "OP_CHECKMULTISIG")
+
+  // Generate a P2WSH 3-of-5 address.
+  p2wsh3of5Address, _ := address.P2WSHAddresssFromScript(newScript)
+
+  // Generate a P2SH 3-of-5 address from the P2WSH address.
+  p2sh3Of5, _ := address.P2SHAddressFromScript(p2wsh3of5Address.ToScriptPubKey(), address.P2WPKHInP2SH)
+
+  // The method calculates the address checksum and returns the Base58-encoded
+  // Bitcoin legacy address or the Bech32 format for SegWit addresses.
+  p2sh3Of5.Show(network)
+
+  // Return the scriptPubKey that corresponds to this address.
+  p2sh3Of5.ToScriptPubKey()
+
+  // Access the legacy or SegWit program of the address.
+  p2sh3Of5.Program()
+  ```
+  
 ### Transaction
 Each type of transaction has its own class for creating transactions
 Descriptions for some of these classes are provided below.
