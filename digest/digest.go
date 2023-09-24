@@ -2,6 +2,7 @@ package digest
 
 import (
 	"crypto/hmac"
+	"crypto/rand"
 	"crypto/sha256"
 	"crypto/sha512"
 
@@ -54,4 +55,19 @@ func PbkdfDeriveDigest(mnemonic string, salt string) []byte {
 	saltBytes := []byte(salt)
 	key := pbkdf2.Key([]byte(mnemonic), saltBytes, 2048, 64, sha512.New)
 	return key
+}
+
+// GenerateRandom creates a byte slice of the specified 'size' containing random data.
+// It generates 'size' random bytes using the crypto/rand package's rand.Read function
+// and returns the resulting byte slice. If any error occurs during the random data
+// generation, it is returned as an error along with a nil byte slice.
+//
+// The function is suitable for generating cryptographically secure random data.
+func GenerateRandom(size int) ([]byte, error) {
+	randomBytes := make([]byte, size)
+	_, err := rand.Read(randomBytes)
+	if err != nil {
+		return nil, err
+	}
+	return randomBytes, nil
 }

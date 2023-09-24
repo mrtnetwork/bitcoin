@@ -1,6 +1,7 @@
 package secretwallet
 
 import (
+	"bitcoin/digest"
 	"bitcoin/formating"
 	"bitcoin/uuid"
 	"crypto/aes"
@@ -240,7 +241,7 @@ func NewScryptKeyDerivator(dkLen, n, r, p int, salt []byte) *ScryptKeyDerivator 
 //   - p: The parallelization parameter for the scrypt key derivation function.
 func NewSecretWallet(credentials string, password string, scryptN int, p int) (*SecretWallet, error) {
 	passwordBytes := []byte(password)
-	salt, err := formating.GenerateRandom(32)
+	salt, err := digest.GenerateRandom(32)
 	if err != nil {
 		return nil, err
 	}
@@ -250,7 +251,7 @@ func NewSecretWallet(credentials string, password string, scryptN int, p int) (*
 	if err != nil {
 		return nil, err
 	}
-	iv, err := formating.GenerateRandom(128 / 8)
+	iv, err := digest.GenerateRandom(128 / 8)
 	if err != nil {
 		return nil, err
 	}

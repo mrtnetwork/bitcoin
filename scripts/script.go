@@ -4,7 +4,7 @@ import (
 	"bitcoin/constant"
 	"bitcoin/digest"
 	"bitcoin/formating"
-	"bitcoin/tools"
+
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
@@ -164,9 +164,9 @@ func (s *Script) ToBytes() []byte {
 			scriptBytes = append(scriptBytes, opCode...)
 		} else {
 			if tokenInt, ok := token.(int); ok {
-				scriptBytes = append(scriptBytes, tools.PushInteger(tokenInt)...)
+				scriptBytes = append(scriptBytes, formating.PushInteger(tokenInt)...)
 			} else if tokenStr, ok := token.(string); ok {
-				scriptBytes = append(scriptBytes, tools.OpPushData(tokenStr)...)
+				scriptBytes = append(scriptBytes, formating.OpPushData(tokenStr)...)
 			}
 		}
 	}

@@ -11,7 +11,7 @@ import (
 )
 
 // spend from 8 different address type to 10 different output
-func ExampleSpendingFrom8InputTo10Output() {
+func TestExampleSpendingFrom8InputTo10Output() {
 	network := address.TestnetNetwork
 	api := provider.SelectApi(provider.MempoolApi, &network)
 	// i generate random mnemonic for test

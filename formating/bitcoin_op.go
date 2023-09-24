@@ -1,9 +1,8 @@
-package tools
+package formating
 
 import (
 	"encoding/hex"
 	"math/bits"
-	"reflect"
 )
 
 // Converts data to appropriate OP_PUSHDATA OP code including length
@@ -35,14 +34,6 @@ func OpPushData(hexData string) []byte {
 	}
 }
 
-func Bytes32FromInt(x int) []byte {
-	result := make([]byte, 32)
-	for i := 0; i < 32; i++ {
-		result[31-i] = byte((x >> (8 * i)) & 0xFF)
-	}
-	return result
-}
-
 // Converts integer to bytes; as signed little-endian integer
 // Currently supports only positive integers
 func PushInteger(integer int) []byte {
@@ -68,22 +59,4 @@ func PushInteger(integer int) []byte {
 	result := append([]byte{byte(len(integerBytes))}, integerBytes...)
 
 	return result
-}
-
-// Check if the value is a struct and if all fields have been filled.
-func IsValidStruct(value interface{}) bool {
-	valueType := reflect.TypeOf(value)
-	isStruct := valueType.Kind() == reflect.Struct
-	if !isStruct {
-		return false
-	}
-	v := reflect.ValueOf(value)
-	for i := 0; i < v.NumField(); i++ {
-		field := v.Field(i)
-		zeroValue := reflect.Zero(field.Type())
-		if field.Interface() == zeroValue.Interface() {
-			return false
-		}
-	}
-	return true
 }

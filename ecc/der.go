@@ -36,6 +36,17 @@ func ListBigIntToDER(bigIntList []*big.Int) []byte {
 	return derBytes
 }
 
+// encodeLength encodes an integer 'length' as a variable-length prefix for a data structure.
+// It is commonly used in various data encoding formats, such as ASN.1 DER or TLV encoding.
+// The function takes an integer 'length' as input and encodes it into a byte slice,
+// following the variable-length encoding rules.
+//
+// If 'length' is less than 128, it is encoded as a single byte with its value.
+// If 'length' is 128 or greater, it is encoded as a multi-byte sequence. The first byte
+// indicates the number of bytes used to encode the length, with the most significant bit set.
+// The subsequent bytes represent the actual length value in big-endian format.
+//
+// The resulting encoded byte slice is returned.
 func encodeLength(length int) []byte {
 	if length < 128 {
 		return []byte{byte(length)}
@@ -49,6 +60,20 @@ func encodeLength(length int) []byte {
 	}
 }
 
+// encodeInteger encodes a non-negative big.Int 'r' as an ASN.1 DER-encoded integer.
+// The function first checks if 'r' is negative, and if so, it raises a panic since negative
+// numbers are not supported in this code.
+//
+// If 'r' is non-negative, it converts it to a hexadecimal string 'h' and ensures that 'h' has
+// an even number of hex digits. If not, a leading zero is added to 'h'.
+//
+// The function then checks the value of the first byte in the resulting byte slice 's':
+//   - If 's[0]' is less than or equal to 0x7F, 's' is directly encoded as a positive integer,
+//     and its length is determined using the 'encodeLength' function.
+//   - If 's[0]' is greater than 0x7F, 's' is encoded as a positive integer with an additional
+//     leading zero byte, and its length is adjusted accordingly.
+//
+// The resulting ASN.1 DER-encoded integer is returned as a byte slice.
 func encodeInteger(r *big.Int) []byte {
 	if r.Sign() < 0 {
 		// Negative numbers are not supported in this code

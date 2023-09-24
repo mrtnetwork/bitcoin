@@ -102,7 +102,7 @@ func SingInput(privateKey []byte, message []byte, sigHash int) string {
 	attempt := 1
 	lengthR := int(signature[3])
 	for lengthR == 33 {
-		attemptBytes := bytes32FromInt(attempt)
+		attemptBytes := formating.Bytes32FromInt(attempt)
 		signature = SingDer(message, privateKey, attemptBytes)
 		attempt++
 		lengthR = int(signature[3])
@@ -118,7 +118,7 @@ func SingInput(privateKey []byte, message []byte, sigHash int) string {
 	R := signature[4 : 4+lengthR]
 	lengthS := int(signature[5+lengthR])
 	S := signature[5+lengthR+1:]
-	sAsBigint := bytesToInt(S)
+	sAsBigint := formating.BytesToInt(S)
 
 	var newS []byte
 
@@ -189,7 +189,7 @@ func SchnorrSign(message []byte, secret []byte, aux []byte) []byte {
 	if pY.Bit(0) == 1 {
 		secretPoint = new(big.Int).Sub(curve.Params().N, secretPoint)
 	}
-	t := xorBytes(encodeBigInt(secretPoint), digest.TaggedHash(aux, "BIP0340/aux"))
+	t := formating.XorBytes(encodeBigInt(secretPoint), digest.TaggedHash(aux, "BIP0340/aux"))
 
 	combined := append(append(t, encodeBigInt(pX)...), message...)
 	kHash := digest.TaggedHash(combined, "BIP0340/nonce")
