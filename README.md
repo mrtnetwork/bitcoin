@@ -215,8 +215,6 @@ At least one example has been created for each transaction type, which you can f
   ```
   
 ### Transaction
-Each type of transaction has its own class for creating transactions
-Descriptions for some of these classes are provided below.
 - With TransactionBuilder
   ```
   // spending from 3 private key with 8 different address to 10 address
@@ -720,93 +718,34 @@ newWallet, _ := hdwallet.FromXPrivateKey(decodedWallet.Credentials, true, networ
 ```
 ### Node provider
 ```
-// Select the network (testnet or mainnet)
-network := address.TestnetNetwork
+	// select network testnet or mainnet
+	network := address.TestnetNetwork
 
-// Create an API instance (BlockCypherApi or MempoolApi).
-// Currently, only a few critical methods have been implemented to retrieve unspent transactions,
-// obtain network fees, receive transactions, and send transactions to the network.
-api := provider.SelectApi(provider.MempoolApi, &network)
+	// create api (BlockCyperApi or MempoolApi)
+	// Currently, only a few critical methods have been implemented to retrieve unspent transactions,
+	// obtain network fees, receive transactions, and send transactions to the network.
+	api := provider.SelectApi(provider.MempoolApi, &network)
 
-// ========================================================================================//
+	// Read Transaction id(hash)
+	tr, e := api.GetTransaction("d4bad8e07d30ca4389ec8a203318aa523cc3e36c9730d0a6852a3801d086c5fe")
 
-// Read the transaction ID (hash)
-tr, e := api.GetTransaction("d4bad8e07d30ca4389ec8a203318aa523cc3e36c9730d0a6852a3801d086c5fe")
-if e != nil {
-	return
-}
-if converted, ok := tr.(*provider.BlockCypherTransaction); ok {
-	// "It's a BlockCypher transaction struct"
-  // converted.Hash
-  // converted.Inputs
-  // ...
-} else if converted, ok := tr.(*provider.MempoolTransaction); ok {
-	// "It's a Mempool transaction struct"
-  // converted.TxID
-  // converted.Vout
-  // ...
-}
+	// Read accounts UTXOS
+	addr, _ := address.P2WPKHAddresssFromAddress("tb1q92nmnvhj04sqd4x7wjaewlt5jn8n3ngmplcymy")
+	utxos, e := api.GetAccountUtxo(provider.UtxoOwnerDetails{
+		PublicKey: "",
+		Address:   addr,
+	})
 
+	// Network fee
+	fee, e := api.GetNetworkFee()
 
-// ========================================================================================//
+	//  Send transaction
+	_, _ = api.SendRawTransaction("TRANSACTION DIGEST")
 
-addr, _ := address.P2WPKHAddressFromAddress("tb1q92nmnvhj04sqd4x7wjaewlt5jn8n3ngmplcymy")
-
-// Read account UTXOs
-utxos, e := api.GetAccountUtxo(provider.UtxoOwnerDetails{
-	PublicKey: "",
-	Address:   addr,
-})
-
-
-// ========================================================================================//
-
-// Network fee
-fee, e := api.GetNetworkFee()
-if e != nil {
-	fmt.Println(e)
-} else {
-	// Fees are in satoshis per kilobyte (PER KB)
-  // fee.Medium
-  // fee.Low
-  // fee.High
-
-	// To calculate the transaction fee, you can use the EstimateFee method of the BitcoinFeeRate struct.
-	// You'll need the transaction size (transaction.GetSize()) or virtual size (transaction.GetVSize()) for SegWit transactions.
-	_ = fee.GetEstimate(500, fee.High)
-}
-
-// ========================================================================================//
-
-// Send a transaction (replace "TRANSACTION DIGEST" with the actual transaction data)
-_, _ = api.SendRawTransaction("TRANSACTION DIGEST")
-
-// ========================================================================================//
-
-// Read account transactions
-transaction, _ := api.GetAccountTransactions(addr.Show(network), func(url string) string {
-	/*
-		You have the option to modify the address before making the request,
-		such as adding parameters like a limit or page number. For more information,
-		please consult the Mempool API or BlockCypher documentation.
-		You have the option to modify the address before making the request,
-		such as adding parameters like a limit or page number. For more information, please consult the Mempool API or BlockCypher documentation.
-	*/
-	return url
-})
-if converted, ok := transaction.(provider.MemoolTransactionList); ok {
-  // "It's a Mempool transactions struct"
-	for i := 0; i < len(converted); i++ {
-		// "Transaction ID: ", converted[i].TxID
-		// "Status: ", converted[i].Status
-	}
-} else if converted, ok := transaction.(provider.BlockCypherTransactionList); ok {
-	// "It's a BlockCypher transaction struct"
-	for i := 0; i < len(converted); i++ {
-    // "Transaction Hash: ", converted[i].Hash
-		// "Confirmations: ", converted[i].Confirmations
-	}
-}
+	// Read account transactions
+	transaction, _ := api.GetAccountTransactions(addr.Show(network), func(url string) string {
+		return url
+	})
 
 ```
 
