@@ -718,23 +718,23 @@ newWallet, _ := hdwallet.FromXPrivateKey(decodedWallet.Credentials, true, networ
 ```
 ### Node provider
 ```
-	// select network testnet or mainnet
-	network := address.TestnetNetwork
+// select network testnet or mainnet
+network := address.TestnetNetwork
 
-	// create api (BlockCyperApi or MempoolApi)
-	// Currently, only a few critical methods have been implemented to retrieve unspent transactions,
-	// obtain network fees, receive transactions, and send transactions to the network.
-	api := provider.SelectApi(provider.MempoolApi, &network)
+// create api (BlockCyperApi or MempoolApi)
+// Currently, only a few critical methods have been implemented to retrieve unspent transactions,
+// obtain network fees, receive transactions, and send transactions to the network.
+api := provider.SelectApi(provider.MempoolApi, &network)
 
-	// Read Transaction id(hash)
-	tr, e := api.GetTransaction("d4bad8e07d30ca4389ec8a203318aa523cc3e36c9730d0a6852a3801d086c5fe")
+// Read Transaction id(hash)
+tr, e := api.GetTransaction("d4bad8e07d30ca4389ec8a203318aa523cc3e36c9730d0a6852a3801d086c5fe")
 
-	// Read accounts UTXOS
-	addr, _ := address.P2WPKHAddresssFromAddress("tb1q92nmnvhj04sqd4x7wjaewlt5jn8n3ngmplcymy")
-	utxos, e := api.GetAccountUtxo(provider.UtxoOwnerDetails{
-		PublicKey: "",
-		Address:   addr,
-	})
+// Read accounts UTXOS
+addr, _ := address.P2WPKHAddresssFromAddress("tb1q92nmnvhj04sqd4x7wjaewlt5jn8n3ngmplcymy")
+utxos, e := api.GetAccountUtxo(provider.UtxoOwnerDetails{
+	PublicKey: "",
+	Address:   addr,
+})
 
 	// Network fee
 	fee, e := api.GetNetworkFee()
