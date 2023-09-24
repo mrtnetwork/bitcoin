@@ -493,7 +493,7 @@ We have added two APIs (Mempool and BlockCypher) to the plugin for network acces
   // Now we check Mempol for what happened https://mempool.space/testnet/tx/5015a7748d8d6df47358902b6cdc6d77ef839945c479924f4592fd89315ac0e0
 
   ```
-- With Scripts
+- With BtcTransaction
   - Spend P2TR UTXO
     ```
     // Private key of the UTXO owner
