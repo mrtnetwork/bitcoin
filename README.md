@@ -88,7 +88,6 @@ Using this package, you can create a Bitcoin transaction in two ways: either thr
 We have added two APIs (Mempool and BlockCypher) to the plugin for network access. You can easily use these two APIs to obtain information such as unspent transactions (UTXO), network fees, sending transactions, receiving transaction information, and retrieving account transactions.
 
 ## EXAMPLES
-At least one example has been created for each transaction type, which you can find in the 'examples' folder.
 
 ### Key and addresses
   - Private key
@@ -494,7 +493,7 @@ At least one example has been created for each transaction type, which you can f
   // Now we check Mempol for what happened https://mempool.space/testnet/tx/5015a7748d8d6df47358902b6cdc6d77ef839945c479924f4592fd89315ac0e0
 
   ```
-- With Scripts
+- With BtcTransaction
   - Spend P2TR UTXO
     ```
     // Private key of the UTXO owner
@@ -718,34 +717,34 @@ newWallet, _ := hdwallet.FromXPrivateKey(decodedWallet.Credentials, true, networ
 ```
 ### Node provider
 ```
-	// select network testnet or mainnet
-	network := address.TestnetNetwork
+// select network testnet or mainnet
+network := address.TestnetNetwork
 
-	// create api (BlockCyperApi or MempoolApi)
-	// Currently, only a few critical methods have been implemented to retrieve unspent transactions,
-	// obtain network fees, receive transactions, and send transactions to the network.
-	api := provider.SelectApi(provider.MempoolApi, &network)
+// create api (BlockCyperApi or MempoolApi)
+// Currently, only a few critical methods have been implemented to retrieve unspent transactions,
+// obtain network fees, receive transactions, and send transactions to the network.
+api := provider.SelectApi(provider.MempoolApi, &network)
 
-	// Read Transaction id(hash)
-	tr, e := api.GetTransaction("d4bad8e07d30ca4389ec8a203318aa523cc3e36c9730d0a6852a3801d086c5fe")
+// Read Transaction id(hash)
+tr, e := api.GetTransaction("d4bad8e07d30ca4389ec8a203318aa523cc3e36c9730d0a6852a3801d086c5fe")
 
-	// Read accounts UTXOS
-	addr, _ := address.P2WPKHAddresssFromAddress("tb1q92nmnvhj04sqd4x7wjaewlt5jn8n3ngmplcymy")
-	utxos, e := api.GetAccountUtxo(provider.UtxoOwnerDetails{
-		PublicKey: "",
-		Address:   addr,
-	})
+// Read accounts UTXOS
+addr, _ := address.P2WPKHAddresssFromAddress("tb1q92nmnvhj04sqd4x7wjaewlt5jn8n3ngmplcymy")
+utxos, e := api.GetAccountUtxo(provider.UtxoOwnerDetails{
+	PublicKey: "",
+	Address:   addr,
+})
 
-	// Network fee
-	fee, e := api.GetNetworkFee()
+// Network fee
+fee, e := api.GetNetworkFee()
 
-	//  Send transaction
-	_, _ = api.SendRawTransaction("TRANSACTION DIGEST")
+//  Send transaction
+_, _ = api.SendRawTransaction("TRANSACTION DIGEST")
 
-	// Read account transactions
-	transaction, _ := api.GetAccountTransactions(addr.Show(network), func(url string) string {
-		return url
-	})
+// Read account transactions
+transaction, _ := api.GetAccountTransactions(addr.Show(network), func(url string) string {
+	return url
+})
 
 ```
 
