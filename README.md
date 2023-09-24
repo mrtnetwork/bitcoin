@@ -88,7 +88,6 @@ Using this package, you can create a Bitcoin transaction in two ways: either thr
 We have added two APIs (Mempool and BlockCypher) to the plugin for network access. You can easily use these two APIs to obtain information such as unspent transactions (UTXO), network fees, sending transactions, receiving transaction information, and retrieving account transactions.
 
 ## EXAMPLES
-At least one example has been created for each transaction type, which you can find in the 'examples' folder.
 
 ### Key and addresses
   - Private key
