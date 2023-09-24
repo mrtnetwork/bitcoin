@@ -21,11 +21,23 @@ The XRP Ledger supports various transaction types, each serving a different purp
 - multi-signature transaction
 
 ### Addresses
-- classAddress: They are straightforward representations of the recipient's address on the XRP Ledger
-- xAddress: newer format, which provides additional features and interoperability. xAddresses include destination tags by default and are designed to simplify cross-network transactions and improve address interoperability
+- P2PKH: A P2PKH (Pay-to-Public-Key-Hash) address in Bitcoin represents ownership of a cryptocurrency wallet by encoding a hashed public key
+- P2WPKH: A P2WPKH (Pay-to-Witness-Public-Key-Hash) address in Bitcoin is a Segregated Witness (SegWit) address that enables more efficient and secure transactions by segregating witness data, enhancing network scalability and security.
+- P2WSH: A P2WSH (Pay-to-Witness-Script-Hash) address in Bitcoin is a Segregated Witness (SegWit) address that allows users to spend bitcoins based on the conditions specified in a witness script, offering improved security and flexibility for complex transaction types.
+- P2TR: A P2TR (Pay-to-Taproot) address in Bitcoin is a type of address that allows users to send and receive bitcoins using the Taproot smart contract, offering enhanced privacy and scalability features.
+- P2SH: A P2SH (Pay-to-Script-Hash) address in Bitcoin is an address type that enables the use of more complex scripting, often associated with multi-signature transactions or other advanced smart contract functionality, enhancing flexibility and security.
+- P2SH(SEGWIT): A P2SH (Pay-to-Script-Hash) Segregated Witness (SegWit) address in Bitcoin combines the benefits of P2SH and SegWit technologies, allowing for enhanced transaction security, reduced fees, and improved scalability.
 
 ### Sign
-- Sign XRP transactions with ED25519 and SECP256K1 algorithms.
+- Sign message: ECDSA Signature Algorithm
+- Sign Segwit(v0) and legacy transaction: ECDSA Signature Algorithm
+- Sign Taproot transaction
+  - Script Path and TapTweak: Taproot allows for multiple script paths (smart contract conditions) to be included in a single transaction. The "taptweak" ensures that the correct 	 
+    script path is used when spending. This enhances privacy by making it difficult to determine the spending conditions from the transaction.
+  - Schnorr Signatures: While ECDSA is still used for Taproot, it also provides support for Schnorr signatures. Schnorr signatures offer benefits such as smaller signature sizes and 	 
+    signature aggregation, contributing to improved scalability and privacy.
+  - Schnorr-Musig: Taproot can leverage Schnorr-Musig, a technique for securely aggregating multiple signatures into a single signature. This feature enables collaborative spending and 
+    enhances privacy.
 
 ### BIP-39
 - Generate BIP39 mnemonics, providing a secure and standardized way to manage keys and seed phrases
@@ -43,9 +55,8 @@ The XRP Ledger supports various transaction types, each serving a different purp
 - Versioning: The JSON file may include a version field to indicate which version of the encryption and storage format is being used.
 - Metadata: Additional metadata, such as the address associated with the private key, may be included in the JSON file.
 
-### JSON-RPC Support
-communicate with XRP nodes via the JSON-RPC protocol
-It has been attempted to embed all the methods into RPC; however, currently, most of the data APIs are delivered in JSON format, and they have not been modeled.
+### Node Provider
+We have added two APIs (Mempool and BlockCypher) to the plugin for network access. You can easily use these two APIs to obtain information such as unspent transactions (UTXO), network fees, sending transactions, receiving transaction information, and retrieving account transactions.
 
 ## EXAMPLES
 At least one example has been created for each transaction type, which you can find in the 'examples' folder.
