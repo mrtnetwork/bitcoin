@@ -1,8 +1,8 @@
 package scripts
 
 import (
-	"bitcoin/constant"
 	"fmt"
+	"github.com/mrtnetwork/bitcoin/constant"
 )
 
 type Sequence struct {

@@ -1,10 +1,10 @@
 package provider
 
 import (
-	"bitcoin/address"
-	"bitcoin/keypair"
-	"bitcoin/scripts"
 	"fmt"
+	"github.com/mrtnetwork/bitcoin/address"
+	"github.com/mrtnetwork/bitcoin/keypair"
+	"github.com/mrtnetwork/bitcoin/scripts"
 )
 
 // MultiSignatureSigner is an interface that defines methods required for representing

@@ -1,9 +1,9 @@
 package scripts
 
 import (
-	"bitcoin/constant"
-	"bitcoin/digest"
-	"bitcoin/formating"
+	"github.com/mrtnetwork/bitcoin/constant"
+	"github.com/mrtnetwork/bitcoin/digest"
+	"github.com/mrtnetwork/bitcoin/formating"
 
 	"encoding/binary"
 	"encoding/hex"

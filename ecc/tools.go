@@ -1,9 +1,9 @@
 package ecc
 
 import (
-	"bitcoin/formating"
 	"crypto/elliptic"
 	"fmt"
+	"github.com/mrtnetwork/bitcoin/formating"
 	"math/big"
 )
 

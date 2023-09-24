@@ -1,16 +1,16 @@
 package hdwallet
 
 import (
-	"bitcoin/address"
-	"bitcoin/base58"
-	"bitcoin/bip39"
-	"bitcoin/digest"
-	"bitcoin/ecc"
-	"bitcoin/formating"
-	"bitcoin/keypair"
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"github.com/mrtnetwork/bitcoin/address"
+	"github.com/mrtnetwork/bitcoin/base58"
+	"github.com/mrtnetwork/bitcoin/bip39"
+	"github.com/mrtnetwork/bitcoin/digest"
+	"github.com/mrtnetwork/bitcoin/ecc"
+	"github.com/mrtnetwork/bitcoin/formating"
+	"github.com/mrtnetwork/bitcoin/keypair"
 	"regexp"
 	"strconv"
 	"strings"

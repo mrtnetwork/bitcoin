@@ -1,8 +1,8 @@
 package example
 
 import (
-	"bitcoin/address"
 	"fmt"
+	"github.com/mrtnetwork/bitcoin/address"
 	"testing"
 )
 

@@ -1,13 +1,13 @@
 package keypair
 
 import (
-	"bitcoin/address"
-	"bitcoin/constant"
-	"bitcoin/digest"
-	"bitcoin/ecc"
-	"bitcoin/formating"
-	"bitcoin/scripts"
 	"fmt"
+	"github.com/mrtnetwork/bitcoin/address"
+	"github.com/mrtnetwork/bitcoin/constant"
+	"github.com/mrtnetwork/bitcoin/digest"
+	"github.com/mrtnetwork/bitcoin/ecc"
+	"github.com/mrtnetwork/bitcoin/formating"
+	"github.com/mrtnetwork/bitcoin/scripts"
 	"strings"
 )
 

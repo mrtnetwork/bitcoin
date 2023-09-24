@@ -1,12 +1,12 @@
 package address
 
 import (
-	"bitcoin/bech32"
-	"bitcoin/constant"
-	"bitcoin/digest"
-	"bitcoin/formating"
-	"bitcoin/scripts"
 	"fmt"
+	"github.com/mrtnetwork/bitcoin/bech32"
+	"github.com/mrtnetwork/bitcoin/constant"
+	"github.com/mrtnetwork/bitcoin/digest"
+	"github.com/mrtnetwork/bitcoin/formating"
+	"github.com/mrtnetwork/bitcoin/scripts"
 )
 
 // addressToSegwitProgram extracts the witness program (data part) from a SegWit (Bech32) address.

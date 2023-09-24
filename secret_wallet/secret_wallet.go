@@ -1,15 +1,15 @@
 package secretwallet
 
 import (
-	"bitcoin/digest"
-	"bitcoin/formating"
-	"bitcoin/uuid"
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/mrtnetwork/bitcoin/digest"
+	"github.com/mrtnetwork/bitcoin/formating"
+	"github.com/mrtnetwork/bitcoin/uuid"
 
 	"golang.org/x/crypto/scrypt"
 )

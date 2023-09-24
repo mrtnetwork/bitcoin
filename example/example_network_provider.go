@@ -1,9 +1,9 @@
 package example
 
 import (
-	"bitcoin/address"
-	"bitcoin/provider"
 	"fmt"
+	"github.com/mrtnetwork/bitcoin/address"
+	"github.com/mrtnetwork/bitcoin/provider"
 )
 
 func ExampleNetworkProvider() {

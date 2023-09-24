@@ -1,16 +1,16 @@
 package test
 
 import (
-	"bitcoin/bip39"
-	"bitcoin/formating"
 	"fmt"
+	"github.com/mrtnetwork/bitcoin/bip39"
+	"github.com/mrtnetwork/bitcoin/formating"
 	"testing"
 )
 
 func TestBip39(t *testing.T) {
 	bip := bip39.Bip39{
 		// Select the desired language, the default language is English
-		// https://github.com/bitcoin/bips/tree/master/bip-0039
+		// https://github.com/github.com/mrtnetwork/bitcoin/bips/tree/master/bip-0039
 		// English
 		// Spanish
 		// Portuguese

@@ -4,9 +4,9 @@
 package ecc
 
 import (
-	"bitcoin/formating"
 	"crypto/hmac"
 	"crypto/sha256"
+	"github.com/mrtnetwork/bitcoin/formating"
 	"hash"
 	"math/big"
 )

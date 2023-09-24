@@ -1,13 +1,13 @@
 package example
 
 import (
-	"bitcoin/address"
-	"bitcoin/provider"
+	"github.com/mrtnetwork/bitcoin/address"
+	"github.com/mrtnetwork/bitcoin/provider"
 
-	"bitcoin/constant"
-	hdwallet "bitcoin/hd_wallet"
-	"bitcoin/keypair"
 	"fmt"
+	"github.com/mrtnetwork/bitcoin/constant"
+	hdwallet "github.com/mrtnetwork/bitcoin/hd_wallet"
+	"github.com/mrtnetwork/bitcoin/keypair"
 	"math/big"
 )
 

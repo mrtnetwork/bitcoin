@@ -28,9 +28,9 @@ This comprehensive package provides robust support for a wide array of Bitcoin t
 
 ### Create Transaction
 Using this package, you can create a Bitcoin transaction in two ways: either through the `BtcTransaction` struct or the `BitcoinTransactionBuilder` struct
-- BtcTransaction: To use the `BtcTransaction` struct, you should have a general understanding of how Bitcoin transactions work, including knowledge of UTXOs, scripts, various types of scripts, Bitcoin addresses, signatures, and more. We created examples and tests to enhance your understanding. An example of this transaction type is explained below, and you can also find numerous examples in the [`test`](https://github.com/MohsenHaydari/bitcoin/tree/main/test) folder.
+- BtcTransaction: To use the `BtcTransaction` struct, you should have a general understanding of how Bitcoin transactions work, including knowledge of UTXOs, scripts, various types of scripts, Bitcoin addresses, signatures, and more. We created examples and tests to enhance your understanding. An example of this transaction type is explained below, and you can also find numerous examples in the [`test`](https://github.com/MohsenHaydari/github.com/mrtnetwork/bitcoin/tree/main/test) folder.
 
-- BitcoinTransactionBuilder: Even with limited prior knowledge, you can utilize this class to send various types of transactions. Below, I've provided an example in which a transaction features 8 distinct input addresses with different types and private keys, as well as 10 different output addresses. Furthermore, additional examples have been prepared, which you can find in the [`example`](https://github.com/MohsenHaydari/bitcoin/tree/main/example) folder.
+- BitcoinTransactionBuilder: Even with limited prior knowledge, you can utilize this class to send various types of transactions. Below, I've provided an example in which a transaction features 8 distinct input addresses with different types and private keys, as well as 10 different output addresses. Furthermore, additional examples have been prepared, which you can find in the [`example`](https://github.com/MohsenHaydari/github.com/mrtnetwork/bitcoin/tree/main/example) folder.
 
 ### Addresses
 - P2PKH A P2PKH (Pay-to-Public-Key-Hash) address in Bitcoin represents ownership of a cryptocurrency wallet by encoding a hashed public key

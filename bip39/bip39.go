@@ -5,15 +5,15 @@
 // This example script showcases how to generate a new BIP-39 mnemonic, derive its entropy, and convert it back
 // to a mnemonic. It also includes error handling and helpful comments to guide you through the process.
 //
-// For more information on BIP-39, refer to the official specification: https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki
+// For more information on BIP-39, refer to the official specification: https://github.com/github.com/mrtnetwork/bitcoin/bips/blob/master/bip-0039.mediawiki
 
 package bip39
 
 import (
-	"bitcoin/digest"
-	"bitcoin/formating"
 	"embed"
 	"fmt"
+	"github.com/mrtnetwork/bitcoin/digest"
+	"github.com/mrtnetwork/bitcoin/formating"
 	"regexp"
 	"strings"
 )

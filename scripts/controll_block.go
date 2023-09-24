@@ -1,8 +1,8 @@
 package scripts
 
 import (
-	"bitcoin/constant"
-	"bitcoin/formating"
+	"github.com/mrtnetwork/bitcoin/constant"
+	"github.com/mrtnetwork/bitcoin/formating"
 )
 
 type ControlBlock struct {

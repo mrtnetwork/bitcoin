@@ -1,8 +1,8 @@
 package address
 
 import (
-	"bitcoin/formating"
 	"fmt"
+	"github.com/mrtnetwork/bitcoin/formating"
 	"strconv"
 )
 

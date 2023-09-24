@@ -1,6 +1,6 @@
 package address
 
-import "bitcoin/scripts"
+import "github.com/mrtnetwork/bitcoin/scripts"
 
 type AddressType int
 

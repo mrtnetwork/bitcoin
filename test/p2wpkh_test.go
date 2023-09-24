@@ -1,9 +1,9 @@
 package test
 
 import (
-	"bitcoin/constant"
-	"bitcoin/keypair"
-	"bitcoin/scripts"
+	"github.com/mrtnetwork/bitcoin/constant"
+	"github.com/mrtnetwork/bitcoin/keypair"
+	"github.com/mrtnetwork/bitcoin/scripts"
 	"math/big"
 	"strings"
 	"testing"

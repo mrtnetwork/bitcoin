@@ -1,9 +1,9 @@
 package provider
 
 import (
-	"bitcoin/address"
-	"bitcoin/keypair"
 	"fmt"
+	"github.com/mrtnetwork/bitcoin/address"
+	"github.com/mrtnetwork/bitcoin/keypair"
 	"math/big"
 )
 

@@ -1,12 +1,12 @@
 package provider
 
 import (
-	"bitcoin/address"
-	"bitcoin/constant"
-	"bitcoin/formating"
-	"bitcoin/scripts"
 	"encoding/hex"
 	"fmt"
+	"github.com/mrtnetwork/bitcoin/address"
+	"github.com/mrtnetwork/bitcoin/constant"
+	"github.com/mrtnetwork/bitcoin/formating"
+	"github.com/mrtnetwork/bitcoin/scripts"
 	"math/big"
 	"strings"
 )

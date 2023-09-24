@@ -1,11 +1,11 @@
 package test
 
 import (
-	"bitcoin/address"
-	"bitcoin/formating"
-	"bitcoin/keypair"
-	"bitcoin/scripts"
 	"bytes"
+	"github.com/mrtnetwork/bitcoin/address"
+	"github.com/mrtnetwork/bitcoin/formating"
+	"github.com/mrtnetwork/bitcoin/keypair"
+	"github.com/mrtnetwork/bitcoin/scripts"
 	"strings"
 	"testing"
 )

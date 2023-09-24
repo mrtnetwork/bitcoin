@@ -1,9 +1,9 @@
 package test
 
 import (
-	"bitcoin/address"
-	hdwallet "bitcoin/hd_wallet"
 	"fmt"
+	"github.com/mrtnetwork/bitcoin/address"
+	hdwallet "github.com/mrtnetwork/bitcoin/hd_wallet"
 	"testing"
 )
 

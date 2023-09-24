@@ -1,7 +1,7 @@
 package test
 
 import (
-	secretwallet "bitcoin/secret_wallet"
+	secretwallet "github.com/mrtnetwork/bitcoin/secret_wallet"
 	"math/rand"
 	"testing"
 	"time"

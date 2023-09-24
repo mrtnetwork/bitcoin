@@ -2,9 +2,9 @@
 package base58
 
 import (
-	"bitcoin/digest"
 	"bytes"
 	"fmt"
+	"github.com/mrtnetwork/bitcoin/digest"
 	"math/big"
 )
 

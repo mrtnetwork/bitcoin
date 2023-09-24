@@ -1,7 +1,7 @@
 package scripts
 
 import (
-	"bitcoin/formating"
+	"github.com/mrtnetwork/bitcoin/formating"
 )
 
 // A list of the witness items required to satisfy the locking conditions of a segwit input (aka witness stack).

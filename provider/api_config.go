@@ -1,7 +1,7 @@
 package provider
 
 import (
-	"bitcoin/address"
+	"github.com/mrtnetwork/bitcoin/address"
 	"strings"
 )
 

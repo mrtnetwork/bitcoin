@@ -1,11 +1,11 @@
 package ecc
 
 import (
-	"bitcoin/digest"
-	"bitcoin/formating"
 	"crypto/elliptic"
 	"crypto/sha256"
 	"errors"
+	"github.com/mrtnetwork/bitcoin/digest"
+	"github.com/mrtnetwork/bitcoin/formating"
 	"math/big"
 )
 

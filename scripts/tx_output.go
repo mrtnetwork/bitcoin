@@ -1,8 +1,8 @@
 package scripts
 
 import (
-	"bitcoin/formating"
 	"encoding/binary"
+	"github.com/mrtnetwork/bitcoin/formating"
 	"math/big"
 )
 

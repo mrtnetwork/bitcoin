@@ -1,13 +1,13 @@
 package address
 
 import (
-	"bitcoin/base58"
-	"bitcoin/digest"
-	"bitcoin/ecc"
-	"bitcoin/formating"
-	"bitcoin/scripts"
 	"bytes"
 	"fmt"
+	"github.com/mrtnetwork/bitcoin/base58"
+	"github.com/mrtnetwork/bitcoin/digest"
+	"github.com/mrtnetwork/bitcoin/ecc"
+	"github.com/mrtnetwork/bitcoin/formating"
+	"github.com/mrtnetwork/bitcoin/scripts"
 	"math/big"
 )
 

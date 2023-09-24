@@ -1,11 +1,11 @@
 package scripts
 
 import (
-	"bitcoin/constant"
-	"bitcoin/formating"
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
+	"github.com/mrtnetwork/bitcoin/constant"
+	"github.com/mrtnetwork/bitcoin/formating"
 )
 
 // TxInput represents a transaction input

@@ -1,9 +1,9 @@
 package scripts
 
 import (
-	"bitcoin/constant"
-	"bitcoin/digest"
-	"bitcoin/formating"
+	"github.com/mrtnetwork/bitcoin/constant"
+	"github.com/mrtnetwork/bitcoin/digest"
+	"github.com/mrtnetwork/bitcoin/formating"
 	"math/big"
 )
 
@@ -289,7 +289,7 @@ func (tx *BtcTransaction) GetTransactionDigest(txInIndex int, script *Script, si
 }
 
 // Returns the segwit v0 transaction's digest for signing.
-//https://github.com/bitcoin/bips/blob/master/bip-0143.mediawiki
+//https://github.com/github.com/mrtnetwork/bitcoin/bips/blob/master/bip-0143.mediawiki
 
 // |  SIGHASH types (see constants.py):
 // |      SIGHASH_ALL - signs all inputs and outputs (default)
@@ -395,9 +395,9 @@ func (tx *BtcTransaction) GetTransactionSegwitDigit(txInIndex int, script *Scrip
 }
 
 // Returns the segwit v1 (taproot) transaction's digest for signing.
-// https://github.com/bitcoin/bips/blob/master/bip-0341.mediawiki
-// Also consult Bitcoin Core code at: https://github.com/bitcoin/bitcoin/blob/29c36f070618ea5148cd4b2da3732ee4d37af66b/src/script/interpreter.cpp#L1478
-// And: https://github.com/bitcoin/bitcoin/blob/b5f33ac1f82aea290b4653af36ac2ad1bf1cce7b/test/functional/test_framework/script.py
+// https://github.com/github.com/mrtnetwork/bitcoin/bips/blob/master/bip-0341.mediawiki
+// Also consult Bitcoin Core code at: https://github.com/github.com/mrtnetwork/bitcoin/github.com/mrtnetwork/bitcoin/blob/29c36f070618ea5148cd4b2da3732ee4d37af66b/src/script/interpreter.cpp#L1478
+// And: https://github.com/github.com/mrtnetwork/bitcoin/github.com/mrtnetwork/bitcoin/blob/b5f33ac1f82aea290b4653af36ac2ad1bf1cce7b/test/functional/test_framework/script.py
 
 //	  SIGHASH types (see constants.py):
 //		 TAPROOT_SIGHASH_ALL - signs all inputs and outputs (default)

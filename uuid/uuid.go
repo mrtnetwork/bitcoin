@@ -1,10 +1,11 @@
 package uuid
 
 import (
-	"bitcoin/formating"
 	"crypto/rand"
 	"fmt"
 	"strings"
+
+	"github.com/mrtnetwork/bitcoin/formating"
 )
 
 // GenerateUUIDv4 generates a version 4 UUID.

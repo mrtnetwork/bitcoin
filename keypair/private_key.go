@@ -1,15 +1,15 @@
 package keypair
 
 import (
-	"bitcoin/address"
-	"bitcoin/base58"
-	"bitcoin/constant"
-	"bitcoin/digest"
-	"bitcoin/ecc"
-	"bitcoin/formating"
 	"bytes"
 	"encoding/hex"
 	"fmt"
+	"github.com/mrtnetwork/bitcoin/address"
+	"github.com/mrtnetwork/bitcoin/base58"
+	"github.com/mrtnetwork/bitcoin/constant"
+	"github.com/mrtnetwork/bitcoin/digest"
+	"github.com/mrtnetwork/bitcoin/ecc"
+	"github.com/mrtnetwork/bitcoin/formating"
 	"strings"
 )
 
