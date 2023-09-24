@@ -219,7 +219,7 @@ Each type of transaction has its own class for creating transactions
 Descriptions for some of these classes are provided below.
 - With TransactionBuilder
   ```
-  // spending from 3 private keys with 8 different addresses to 10 addresses
+  // spending from 3 private key with 8 different address to 10 address
   // network
   network := address.TestnetNetwork
   // create node provider
