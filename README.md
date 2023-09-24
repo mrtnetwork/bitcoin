@@ -736,16 +736,16 @@ utxos, e := api.GetAccountUtxo(provider.UtxoOwnerDetails{
 	Address:   addr,
 })
 
-	// Network fee
-	fee, e := api.GetNetworkFee()
+// Network fee
+fee, e := api.GetNetworkFee()
 
-	//  Send transaction
-	_, _ = api.SendRawTransaction("TRANSACTION DIGEST")
+//  Send transaction
+_, _ = api.SendRawTransaction("TRANSACTION DIGEST")
 
-	// Read account transactions
-	transaction, _ := api.GetAccountTransactions(addr.Show(network), func(url string) string {
-		return url
-	})
+// Read account transactions
+transaction, _ := api.GetAccountTransactions(addr.Show(network), func(url string) string {
+	return url
+})
 
 ```
 
