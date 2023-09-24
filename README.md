@@ -6,36 +6,54 @@ ED25519 and SECP256K1. It allows developers to create and sign XRP transactions 
 ## Features
 
 ### Transaction Types
-The XRP Ledger supports various transaction types, each serving a different purpose:
+This comprehensive package provides robust support for a wide array of Bitcoin transaction types, encompassing the full spectrum of Bitcoin transaction capabilities. Whether you need to execute standard payments, facilitate complex multi-signature wallets, leverage Segregated Witness (SegWit) transactions for lower fees and enhanced scalability, or embrace the privacy and flexibility of Pay-to-Taproot (P2TR) transactions, this package has you covered. Additionally, it empowers users to engage in legacy transactions, create time-locked transactions, and harness the security of multisignature (multisig) transactions. With this package, you can seamlessly navigate the diverse landscape of Bitcoin transactions, ensuring your interactions with the Bitcoin network are secure, efficient, and tailored to your specific needs.
 
-- Payment Transactions: Standard transactions used to send XRP or Issue from one address to another.
-- Escrow Transactions: These transactions lock up XRP until certain conditions are met, providing a trustless way to facilitate delayed payments.
-- TrustSet Transactions: Used to create or modify trust lines, enabling users to hold and trade assets other than XRP on the ledger.
-- OrderBook Transactions: Used to place and cancel offers on the decentralized exchange within the XRP Ledger.
-- PaymentChannel Transactions: Allow for off-chain payments using payment channels.
-- NFT: Mint NFTs, cancel them, create offers, and seamlessly accept NFT offers
-- Issue: Issue custom assets
-- Automated Market Maker: operations like bidding, creation, deletion, deposits, voting
-- RegularKey: transactions to set or update account regular keys
-- Offer: creation, cancel
-- multi-signature transaction
+- P2PKH (Pay-to-Public-Key-Hash): The most common transaction type, it sends funds to a recipient's public key hash. Provides security and anonymity.
+
+- P2SH (Pay-to-Script-Hash): Allows more complex scripts to be used, enhancing Bitcoin's capabilities by enabling features like multisignature wallets.
+
+- P2WPKH (Pay-to-Witness-Public-Key-Hash): A Segregated Witness (SegWit) transaction type, it offers reduced fees and improved scalability while maintaining compatibility.
+
+- P2WSH (Pay-to-Witness-Script-Hash): Another SegWit transaction, it extends the benefits of SegWit to more complex script scenarios, reducing transaction size and fees.
+
+- P2TR (Pay-to-Taproot): An upgrade aiming to improve privacy and flexibility, allowing users to choose between various scripts and enhance transaction efficiency.
+
+- Legacy Transactions: Refers to older transaction types used before SegWit, with higher fees and less scalability.
+
+- Multisignature (Multisig) Transactions: Involves multiple signatures to authorize a Bitcoin transaction, commonly used for security purposes in shared wallets.
+
+- SegWit Transactions: A collective term for P2WPKH and P2WSH transactions, leveraging segregated witness data to reduce transaction size and fees.
+
+- Time-Locked Transactions: These transactions have a predetermined time or block height before they can be spent, adding security and functionality to Bitcoin smart contracts.
+
+- Coinbase Transactions: The first transaction in each block, generating new Bitcoins as a block reward for miners. It includes the miner's payout address.
 
 ### Addresses
-- P2PKH: A P2PKH (Pay-to-Public-Key-Hash) address in Bitcoin represents ownership of a cryptocurrency wallet by encoding a hashed public key
+- P2PKH A P2PKH (Pay-to-Public-Key-Hash) address in Bitcoin represents ownership of a cryptocurrency wallet by encoding a hashed public key
+  
 - P2WPKH: A P2WPKH (Pay-to-Witness-Public-Key-Hash) address in Bitcoin is a Segregated Witness (SegWit) address that enables more efficient and secure transactions by segregating witness data, enhancing network scalability and security.
+  
 - P2WSH: A P2WSH (Pay-to-Witness-Script-Hash) address in Bitcoin is a Segregated Witness (SegWit) address that allows users to spend bitcoins based on the conditions specified in a witness script, offering improved security and flexibility for complex transaction types.
+  
 - P2TR: A P2TR (Pay-to-Taproot) address in Bitcoin is a type of address that allows users to send and receive bitcoins using the Taproot smart contract, offering enhanced privacy and scalability features.
+  
 - P2SH: A P2SH (Pay-to-Script-Hash) address in Bitcoin is an address type that enables the use of more complex scripting, often associated with multi-signature transactions or other advanced smart contract functionality, enhancing flexibility and security.
+  
 - P2SH(SEGWIT): A P2SH (Pay-to-Script-Hash) Segregated Witness (SegWit) address in Bitcoin combines the benefits of P2SH and SegWit technologies, allowing for enhanced transaction security, reduced fees, and improved scalability.
 
 ### Sign
 - Sign message: ECDSA Signature Algorithm
+  
 - Sign Segwit(v0) and legacy transaction: ECDSA Signature Algorithm
+  
 - Sign Taproot transaction
+  
   - Script Path and TapTweak: Taproot allows for multiple script paths (smart contract conditions) to be included in a single transaction. The "taptweak" ensures that the correct 	 
     script path is used when spending. This enhances privacy by making it difficult to determine the spending conditions from the transaction.
+    
   - Schnorr Signatures: While ECDSA is still used for Taproot, it also provides support for Schnorr signatures. Schnorr signatures offer benefits such as smaller signature sizes and 	 
     signature aggregation, contributing to improved scalability and privacy.
+    
   - Schnorr-Musig: Taproot can leverage Schnorr-Musig, a technique for securely aggregating multiple signatures into a single signature. This feature enables collaborative spending and 
     enhances privacy.
 
@@ -47,12 +65,19 @@ The XRP Ledger supports various transaction types, each serving a different purp
 
 ### Web3 Secret Storage Definition
 - JSON Format: Private keys are stored in a JSON (JavaScript Object Notation) format, making it easy to work with in various programming languages.
+  
 - Encryption: The private key is encrypted using the user's chosen password. This ensures that even if the JSON file is compromised, an attacker cannot access the private key without the password.
+  
 - Key Derivation: The user's password is typically used to derive an encryption key using a key derivation function (KDF). This derived key is then used to encrypt the private key.
+  
 - Scrypt Algorithm: The Scrypt algorithm is commonly used for key derivation, as it is computationally intensive and resistant to brute-force attacks.
+  
 - Checksum: A checksum is often included in the JSON file to help detect errors in the password.
+  
 - Initialization Vector (IV): An IV is typically used to add an extra layer of security to the encryption process.
+  
 - Versioning: The JSON file may include a version field to indicate which version of the encryption and storage format is being used.
+  
 - Metadata: Additional metadata, such as the address associated with the private key, may be included in the JSON file.
 
 ### Node Provider
