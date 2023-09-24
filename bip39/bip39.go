@@ -195,19 +195,31 @@ func (bip39 *Bip39) ValidateMnemonic(mnemonic string) bool {
 	_, err := bip39.MnemonicToEntropy(mnemonic)
 	return err == nil
 }
-func (bip39 *Bip39) wordsToBinary(word string) string {
+
+// wordsToBinary converts a BIP-39 mnemonic word to its binary representation.
+// It searches for the word in the Bip39 instance's word list and returns the binary representation.
+// Returns an error if the word is not found in the word list.
+func (bip39 *Bip39) wordsToBinary(word string) (string, error) {
+	// Initialize the index to -1 (not found)
 	index := -1
+
+	// Search for the word in the word list
 	for i, w := range bip39.wordList {
 		if w == word {
 			index = i
 			break
 		}
 	}
+
+	// If the word is not found in the word list, return an error
 	if index == -1 {
-		panic("Invalid mnemonic")
+		return "", fmt.Errorf("invalid mnemonic")
 	}
 
-	return fmt.Sprintf("%011b", index)
+	// Convert the found index to a binary representation with 11 bits
+	binaryRepresentation := fmt.Sprintf("%011b", index)
+
+	return binaryRepresentation, nil
 }
 
 // mapping algorithm to convert each word into its corresponding binary value
@@ -223,7 +235,11 @@ func (bip39 *Bip39) MnemonicToEntropy(mnemonic string) ([]byte, error) {
 
 	bits := ""
 	for _, word := range words {
-		bits += bip39.wordsToBinary(word)
+		b, err := bip39.wordsToBinary(word)
+		if err != nil {
+			return nil, err
+		}
+		bits += b
 	}
 	dividerIndex := (len(bits) / 33) * 32
 	entropyBits := bits[:dividerIndex]
