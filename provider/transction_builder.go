@@ -310,13 +310,6 @@ func (build *BitcoinTransactionBuilder) buildOutputs() []*scripts.TxOutput {
 	return outputs
 }
 
-/*
-the scriptPubKey of a UTXO (Unspent Transaction Output) is used as the locking
-script that defines the spending conditions for the bitcoins associated
-with that UTXO. When creating a Bitcoin transaction, the spending conditions
-specified by the scriptPubKey must be satisfied by the corresponding scriptSig
-in the transaction input to spend the UTXO.
-*/
 func buildOutputScriptPubKey(addr BitcoinOutputDetails) *scripts.Script {
 	return addr.Address.ToScriptPubKey()
 }
