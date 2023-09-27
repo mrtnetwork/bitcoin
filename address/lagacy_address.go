@@ -3,12 +3,13 @@ package address
 import (
 	"bytes"
 	"fmt"
+	"math/big"
+
 	"github.com/mrtnetwork/bitcoin/base58"
 	"github.com/mrtnetwork/bitcoin/digest"
 	"github.com/mrtnetwork/bitcoin/ecc"
 	"github.com/mrtnetwork/bitcoin/formating"
 	"github.com/mrtnetwork/bitcoin/scripts"
-	"math/big"
 )
 
 // IsValidAddress checks the validity of a Bitcoin address. It verifies whether the input address is
@@ -164,11 +165,11 @@ func fromScript(script *scripts.Script) string {
 // - string: A hexadecimal string representing the hash160 of the Bitcoin address.
 // - error: An error if the input address is invalid or cannot be decoded.
 func addressToHash160(address string) (string, error) {
-	dec, err := base58.Decode(address)
+	dec, err := base58.DecodeCheck(address)
 	if err != nil {
 		return "", fmt.Errorf("invalid addresss")
 	}
-	hash160 := dec[1 : len(dec)-4]
+	hash160 := dec[1:]
 	return formating.BytesToHex(hash160), nil
 }
 

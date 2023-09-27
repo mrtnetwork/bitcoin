@@ -1,16 +1,16 @@
 package keypair
 
 import (
-	"bytes"
 	"encoding/hex"
 	"fmt"
+	"strings"
+
 	"github.com/mrtnetwork/bitcoin/address"
 	"github.com/mrtnetwork/bitcoin/base58"
 	"github.com/mrtnetwork/bitcoin/constant"
 	"github.com/mrtnetwork/bitcoin/digest"
 	"github.com/mrtnetwork/bitcoin/ecc"
 	"github.com/mrtnetwork/bitcoin/formating"
-	"strings"
 )
 
 type ECPrivate struct {
@@ -75,28 +75,14 @@ func NewECPrivateFromBytes(privBytes []byte) (*ECPrivate, error) {
 // NewECPrivateFromWIF creates an ECPrivate instance from a WIF string
 // and returns a pointer to the initialized object.
 func NewECPrivateFromWIF(wif string) (*ECPrivate, error) {
-	b64, err := base58.Decode(wif)
+	keyBytes, err := base58.DecodeCheck(wif)
 	if err != nil {
 		return nil, fmt.Errorf("invalid WIF length")
-	}
-	lengthWithoutChecksum := len(b64) - 4
-
-	// Extract keyBytes
-	keyBytes := b64[:lengthWithoutChecksum]
-
-	// Extract checksum
-	checksum := b64[lengthWithoutChecksum:]
-
-	h := digest.DoubleHash(keyBytes)
-
-	if !bytes.Equal(h[:4], checksum) {
-		panic("invalid checksum")
 	}
 	keyBytes = keyBytes[1:]
 	if len(keyBytes) > 32 {
 		keyBytes = keyBytes[:len(keyBytes)-1]
 	}
-
 	return NewECPrivateFromBytes(keyBytes)
 }
 
@@ -109,10 +95,7 @@ func (ecPriv *ECPrivate) ToWIF(compressed bool, networkType address.NetworkInfo)
 	} else {
 		bytes = append([]byte{networkType.WIF()}, ecPriv.privateKey...)
 	}
-
-	checksum := digest.DoubleHash(bytes)
-	bytes = append(bytes, checksum[:4]...)
-	return base58.Encode(bytes)
+	return base58.EncodeCheck(bytes)
 }
 
 func (ecPriv *ECPrivate) GetPublic() *ECPublic {

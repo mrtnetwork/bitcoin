@@ -2,16 +2,18 @@ package example
 
 import (
 	"fmt"
+	"math/big"
+	"testing"
+
 	"github.com/mrtnetwork/bitcoin/address"
 	"github.com/mrtnetwork/bitcoin/constant"
 	hdwallet "github.com/mrtnetwork/bitcoin/hd_wallet"
 	"github.com/mrtnetwork/bitcoin/keypair"
 	"github.com/mrtnetwork/bitcoin/provider"
-	"math/big"
 )
 
 // spend from 8 different address type to 10 different output
-func TestExampleSpendingFrom8InputTo10Output() {
+func TestExampleSpendingFrom8InputTo10Output(t *testing.T) {
 	network := address.TestnetNetwork
 	api := provider.SelectApi(provider.MempoolApi, &network)
 	// i generate random mnemonic for test
@@ -33,6 +35,7 @@ func TestExampleSpendingFrom8InputTo10Output() {
 	private2, _ := sp2.GetPrivate()
 	private3, _ := sp3.GetPrivate()
 	private4, _ := sp4.GetPrivate()
+
 	// access to public key `ECPublic`
 	public1 := sp1.GetPublic()
 	public2 := sp2.GetPublic()
@@ -46,7 +49,7 @@ func TestExampleSpendingFrom8InputTo10Output() {
 	// myVMJgRi6arv4hLbeUcJYKUJWmFnpjtVme
 	// equals to exampleAddr1 := address.P2PKHAddressFromAddress("myVMJgRi6arv4hLbeUcJYKUJWmFnpjtVme")
 	exampleAddr1 := public1.ToAddress()
-
+	fmt.Println("example 1: ", exampleAddr1.Show(network))
 	// P2TR ADDRESS
 	// tb1pyhmqwlcrws4dxcgalt4mrffgnys879vs59xf6sve4hazyvmhecxq3e6sc0
 	// equals to exampleAddr2 := address.P2TRAddressFromAddress("tb1pyhmqwlcrws4dxcgalt4mrffgnys879vs59xf6sve4hazyvmhecxq3e6sc0")
@@ -117,7 +120,7 @@ func TestExampleSpendingFrom8InputTo10Output() {
 	// i add some method for provider to read utxos from mempol or blockCypher
 	// looping address to read Utxos
 	for _, spender := range spenders {
-		// read ech address utxo from mempol
+		// read each address utxo from mempol
 		spenderUtxos, err := api.GetAccountUtxo(spender)
 
 		// oh this address does not have any satoshi for spending
@@ -215,7 +218,7 @@ func TestExampleSpendingFrom8InputTo10Output() {
 
 		// If you like the note write something else and leave it blank
 		// I will put my GitHub address here
-		"https://github.com/MohsenHaydari",
+		"https://github.com/mrtnetwork",
 		/*
 			RBF, or Replace-By-Fee, is a feature in Bitcoin that allows you to increase the fee of an unconfirmed
 			transaction that you've broadcasted to the network.
@@ -299,18 +302,16 @@ func TestExampleSpendingFrom8InputTo10Output() {
 	isSegwitTr := transactionBuilder.HasSegwit()
 
 	// transaction id
-	transactionId := transaction.TxId()
-	fmt.Println("transaction ID: ", transactionId)
+	_ = transaction.TxId()
 
 	// transaction size
-	var transactionSize int
+	var _ int
 
 	if isSegwitTr {
-		transactionSize = transaction.GetVSize()
+		_ = transaction.GetVSize()
 	} else {
-		transactionSize = transaction.GetSize()
+		_ = transaction.GetSize()
 	}
-	fmt.Println("transaction size: ", transactionSize)
 
 	// now we send transaction to network
 	trId, err := api.SendRawTransaction(digest)

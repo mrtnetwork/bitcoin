@@ -2,13 +2,14 @@ package keypair
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/mrtnetwork/bitcoin/address"
 	"github.com/mrtnetwork/bitcoin/constant"
 	"github.com/mrtnetwork/bitcoin/digest"
 	"github.com/mrtnetwork/bitcoin/ecc"
 	"github.com/mrtnetwork/bitcoin/formating"
 	"github.com/mrtnetwork/bitcoin/scripts"
-	"strings"
 )
 
 type ECPublic struct {
@@ -91,7 +92,7 @@ func (ecPublic *ECPublic) ToAddress(compressed ...interface{}) *address.P2PKHAdd
 	return addr
 }
 
-// ToAddress generates a P2PKH (Pay-to-Public-Key-Hash) address from the ECPublic key.
+// ToP2PKHInP2SH generates a P2PKH (Pay-to-Public-Key-Hash) address from the ECPublic key.
 // If 'compressed' is true, the key is in compressed format.
 func (ecPublic *ECPublic) ToP2PKHInP2SH(compressed ...interface{}) *address.P2SHAdress {
 	addr := ecPublic.ToAddress(compressed...)

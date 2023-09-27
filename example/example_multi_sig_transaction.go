@@ -6,10 +6,11 @@ import (
 
 	"errors"
 	"fmt"
+	"math/big"
+
 	"github.com/mrtnetwork/bitcoin/constant"
 	hdwallet "github.com/mrtnetwork/bitcoin/hd_wallet"
 	"github.com/mrtnetwork/bitcoin/keypair"
-	"math/big"
 )
 
 func ExampleMultiSigTransactionSpending() {

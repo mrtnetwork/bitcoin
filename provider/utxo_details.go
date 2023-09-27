@@ -2,9 +2,10 @@ package provider
 
 import (
 	"fmt"
+	"math/big"
+
 	"github.com/mrtnetwork/bitcoin/address"
 	"github.com/mrtnetwork/bitcoin/keypair"
-	"math/big"
 )
 
 // UtxoOwnerDetails represents ownership details associated with a Bitcoin unspent transaction output (UTXO).
@@ -20,8 +21,6 @@ type UtxoOwnerDetails struct {
 	// MultiSigAddress is a pointer to a MultiSignaturAddress instance representing a multi-signature address
 	// associated with the UTXO owner. It may be nil if the UTXO owner is not using a multi-signature scheme.
 	MultiSigAddress *MultiSignaturAddress
-	// Utxo is a BitcoinUtxo instance representing the unspent transaction output.
-	Utxo BitcoinUtxo
 }
 
 // UtxoWithOwner represents an unspent transaction output (UTXO) along with its associated owner details.

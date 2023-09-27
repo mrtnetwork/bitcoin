@@ -3,12 +3,13 @@ package provider
 import (
 	"encoding/hex"
 	"fmt"
+	"math/big"
+	"strings"
+
 	"github.com/mrtnetwork/bitcoin/address"
 	"github.com/mrtnetwork/bitcoin/constant"
 	"github.com/mrtnetwork/bitcoin/formating"
 	"github.com/mrtnetwork/bitcoin/scripts"
-	"math/big"
-	"strings"
 )
 
 type BitcoinSignerCallBack func(trDigest []byte, utxo UtxoWithOwner, multiSigPublicKey string) (string, error)

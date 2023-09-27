@@ -2,12 +2,14 @@ package test
 
 import (
 	"bytes"
+	"fmt"
+	"strings"
+	"testing"
+
 	"github.com/mrtnetwork/bitcoin/address"
 	"github.com/mrtnetwork/bitcoin/formating"
 	"github.com/mrtnetwork/bitcoin/keypair"
 	"github.com/mrtnetwork/bitcoin/scripts"
-	"strings"
-	"testing"
 )
 
 func TestPrivateKeys(t *testing.T) {
@@ -95,6 +97,15 @@ func TestP2pkhAddresses(t *testing.T) {
 	if !strings.EqualFold(p2.Program().Hash160, hash160c) {
 		t.Errorf("Expected %v, but got %v", hash160c, p2.Program().Hash160)
 	}
+	t.Run("testx", func(t *testing.T) {
+		tx, err := address.P2PKHAddressFromAddress(address1)
+		if err == nil {
+			fmt.Println(tx.Program().Hash160 == hash160)
+		} else {
+			print(err.Error())
+		}
+
+	})
 }
 func TestP2SHhAddresses(t *testing.T) {
 	prive, _ := keypair.NewECPrivateFromWIF("cTALNpTpRbbxTCJ2A5Vq88UxT44w1PE2cYqiB3n4hRvzyCev1Wwo")
@@ -223,6 +234,7 @@ func TestP2trAddresses(t *testing.T) {
 	t.Run("t7", func(t *testing.T) {
 		pub := privOdd.GetPublic()
 		program := pub.ToTaprootAddress().Program().Program
+		fmt.Println("program: ", program)
 		if !strings.EqualFold(program, correctOddTweakedPk) {
 			t.Errorf("Expected %v, but got %v", correctOddTweakedPk, program)
 		}
