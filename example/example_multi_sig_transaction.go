@@ -1,3 +1,4 @@
+// Examples, of how to use the package
 package example
 
 import (

@@ -1,5 +1,4 @@
-// "BIP39 multi-language support implementation for mnemonic phrases.
-
+// BIP39 multi-language support implementation for mnemonic phrases.
 package bip39
 
 import (

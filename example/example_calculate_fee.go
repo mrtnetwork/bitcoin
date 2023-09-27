@@ -1,3 +1,4 @@
+// Examples, of how to use the package
 package example
 
 import (
@@ -5,10 +6,11 @@ import (
 	"github.com/mrtnetwork/bitcoin/provider"
 
 	"fmt"
+	"math/big"
+
 	"github.com/mrtnetwork/bitcoin/constant"
 	hdwallet "github.com/mrtnetwork/bitcoin/hd_wallet"
 	"github.com/mrtnetwork/bitcoin/keypair"
-	"math/big"
 )
 
 /*
