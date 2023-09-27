@@ -1,3 +1,4 @@
+// Implementation of Bitcoin-specific hash functions, including SHA-256, RIPEMD-160 (Hash160), and TaggedHash.
 package digest
 
 import (

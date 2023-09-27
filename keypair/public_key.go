@@ -1,3 +1,4 @@
+// keypair management for private and public keys.
 package keypair
 
 import (

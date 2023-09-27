@@ -1,3 +1,4 @@
+// Tools for handling byte manipulation, number encoding, and string conversion in the context of Bitcoin.
 package formating
 
 import (

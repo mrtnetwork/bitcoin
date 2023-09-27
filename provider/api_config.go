@@ -1,8 +1,10 @@
+// access BlockCypher and Mempool APIs for fetching UTXos, transaction data, network fees, and sending transactions in the Bitcoin network
 package provider
 
 import (
-	"github.com/mrtnetwork/bitcoin/address"
 	"strings"
+
+	"github.com/mrtnetwork/bitcoin/address"
 )
 
 type APIType int

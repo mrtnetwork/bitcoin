@@ -1,3 +1,4 @@
+// Bitcoin's op codes and constants
 package constant
 
 // Bitcoin's op codes. Complete list at: https://en.bitcoin.it/wiki/Script

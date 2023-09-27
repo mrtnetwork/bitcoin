@@ -1,9 +1,14 @@
+// Implementation of Hierarchical Deterministic (HD) wallet functionality following the BIP32 standard for Bitcoin and other cryptocurrencies
 package hdwallet
 
 import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"regexp"
+	"strconv"
+	"strings"
+
 	"github.com/mrtnetwork/bitcoin/address"
 	"github.com/mrtnetwork/bitcoin/base58"
 	"github.com/mrtnetwork/bitcoin/bip39"
@@ -11,9 +16,6 @@ import (
 	"github.com/mrtnetwork/bitcoin/ecc"
 	"github.com/mrtnetwork/bitcoin/formating"
 	"github.com/mrtnetwork/bitcoin/keypair"
-	"regexp"
-	"strconv"
-	"strings"
 )
 
 // HdWallet represents an HD Wallet.

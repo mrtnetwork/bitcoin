@@ -1,3 +1,4 @@
+// Implementation of a Universally Unique Identifier (UUID) generator
 package uuid
 
 import (

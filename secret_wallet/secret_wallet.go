@@ -1,3 +1,4 @@
+// Implementation of the Web3 Secret Storage Definition to protect private keys.
 package secretwallet
 
 import (
@@ -7,6 +8,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+
 	"github.com/mrtnetwork/bitcoin/digest"
 	"github.com/mrtnetwork/bitcoin/formating"
 	"github.com/mrtnetwork/bitcoin/uuid"

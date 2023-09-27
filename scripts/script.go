@@ -1,3 +1,4 @@
+// Implementation of Bitcoin script handling, transaction creation, and Bitcoin script features.
 package scripts
 
 import (

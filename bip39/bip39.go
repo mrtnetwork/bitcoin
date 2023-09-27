@@ -1,11 +1,4 @@
-// Package bip39_example demonstrates the usage of the bip39 package to work with BIP-39 mnemonic phrases,
-// entropy generation, and mnemonic conversion. BIP-39 is a widely used standard for creating human-readable
-// representations of cryptographic keys.
-//
-// This example script showcases how to generate a new BIP-39 mnemonic, derive its entropy, and convert it back
-// to a mnemonic. It also includes error handling and helpful comments to guide you through the process.
-//
-// For more information on BIP-39, refer to the official specification: https://github.com/github.com/mrtnetwork/bitcoin/bips/blob/master/bip-0039.mediawiki
+// "BIP39 multi-language support implementation for mnemonic phrases.
 
 package bip39
 

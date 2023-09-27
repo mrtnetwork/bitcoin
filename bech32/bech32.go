@@ -1,4 +1,4 @@
-// Reference implementation for Bech32/Bech32m and segwit addresses.
+// Bech32 implementation for Bitcoin addresses.
 package bech32
 
 import (

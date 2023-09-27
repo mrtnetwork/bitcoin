@@ -1,11 +1,12 @@
-// / Base58 and base58Check implement
+// Base58 and base58Check implement
 package base58
 
 import (
 	"bytes"
 	"fmt"
-	"github.com/mrtnetwork/bitcoin/digest"
 	"math/big"
+
+	"github.com/mrtnetwork/bitcoin/digest"
 )
 
 const (
