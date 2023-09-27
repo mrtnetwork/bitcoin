@@ -12,10 +12,11 @@ package bip39
 import (
 	"embed"
 	"fmt"
-	"github.com/mrtnetwork/bitcoin/digest"
-	"github.com/mrtnetwork/bitcoin/formating"
 	"regexp"
 	"strings"
+
+	"github.com/mrtnetwork/bitcoin/digest"
+	"github.com/mrtnetwork/bitcoin/formating"
 )
 
 type Bip39Language string
