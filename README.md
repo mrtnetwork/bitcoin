@@ -529,8 +529,8 @@ We have added two APIs (Mempool and BlockCypher) to the plugin for network acces
     // - Index 0
     // - The scriptPubkeys that correspond to all the inputs/UTXOs
     // - The amounts that correspond to all the inputs/UTXOs
-    // - Ext_flag: Extension mechanism, default is 0; 1 is for script spending (BIP342)
-    // - Script: The script that we are spending when ext_flag is 1
+    // - Ext_flag: Extension mechanism, default is 0; 1 is for tap leaf script version
+    // - tap leaf script: The script that we are spending when ext_flag is 1
     digest := tx.GetTransactionTaprootDigest(0, []*scripts.Script{fromAddr.ToScriptPubKey()}, []*big.Int{big.NewInt(3500)}, 0, scripts.NewScript(), constant.TAPROOT_SIGHASH_ALL)
 
     // Sign the transaction
@@ -538,8 +538,8 @@ We have added two APIs (Mempool and BlockCypher) to the plugin for network acces
     // - Transaction digest related to the index
     // - Signature Hash Type (TAPROOT_SIGHASH_ALL)
     // - Script path (tapleafs)
-    // - Tweak: Note that we don't use tapleafs script in this transaction, so the tweak should be set to False
-    sig := privateKey.SignTaprootTransaction(digest, constant.TAPROOT_SIGHASH_ALL, []interface{}{}, false)
+    // - Tweak: Note that we don't use leaf version of tap-script in this transaction, so the tweak should be set to true
+    sig := privateKey.SignTaprootTransaction(digest, constant.TAPROOT_SIGHASH_ALL, []interface{}{}, true)
 
     // Create a witness signature and set it to the transaction at the current index
     witness := scripts.NewTxWitnessInput(sig)
