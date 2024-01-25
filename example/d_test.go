@@ -2,6 +2,8 @@
 package example
 
 import (
+	"testing"
+
 	"github.com/mrtnetwork/bitcoin/address"
 	"github.com/mrtnetwork/bitcoin/provider"
 
@@ -14,13 +16,10 @@ import (
 	"github.com/mrtnetwork/bitcoin/keypair"
 )
 
-func ExampleMultiSigTransactionSpending() {
+func TestD(t *testing.T) {
 	network := address.TestnetNetwork
 	api := provider.SelectApi(provider.BlockCyperApi, &network)
-	// i generate random mnemonic for test
-	// mnemoic, _ := bip39.GenerateMnemonic(256)
 	mnemonic := "spy often critic spawn produce volcano depart fire theory fog turn retire"
-
 	// accsess to private and public keys
 	masterWallet, _ := hdwallet.FromMnemonic(mnemonic, "")
 
@@ -159,6 +158,7 @@ func ExampleMultiSigTransactionSpending() {
 			fmt.Println("address does not have any satoshi for spending: ", spender.Address.Show(network))
 			continue
 		}
+		fmt.Println("spending: ", spenderUtxos.SumOfUtxosValue(), spender.Address.Show(network), spender.Address.GetType())
 
 		// we append address utxos to utxos list
 		utxos = append(utxos, spenderUtxos...)
@@ -166,7 +166,7 @@ func ExampleMultiSigTransactionSpending() {
 	}
 	// Well, now we calculate how much we can spend
 	sumOfUtxo := utxos.SumOfUtxosValue()
-
+	fmt.Println("sum of utxos: ", sumOfUtxo)
 	hasSatoshi := sumOfUtxo.Cmp(big.NewInt(0)) != 0
 
 	if !hasSatoshi {
@@ -180,7 +180,7 @@ func ExampleMultiSigTransactionSpending() {
 
 	// We consider 50,000 satoshi for the cost
 	// in next example i show you how to calculate fee
-	FEE := big.NewInt(50008)
+	FEE := big.NewInt(3000)
 
 	// now we have 606,920 for spending let do it
 	// we create 5 different output with  different address type
@@ -188,23 +188,23 @@ func ExampleMultiSigTransactionSpending() {
 
 	output3 := provider.BitcoinOutputDetails{
 		Address: exampleAddr3,
-		Value:   big.NewInt(121384),
+		Value:   big.NewInt(236768),
 	}
 	output4 := provider.BitcoinOutputDetails{
 		Address: exampleAddr2,
-		Value:   big.NewInt(121384),
+		Value:   big.NewInt(1000),
 	}
 	output5 := provider.BitcoinOutputDetails{
 		Address: exampleAddr1,
-		Value:   big.NewInt(121384),
+		Value:   big.NewInt(1000),
 	}
 	output6 := provider.BitcoinOutputDetails{
 		Address: multiSigAddress,
-		Value:   big.NewInt(121384),
+		Value:   big.NewInt(1000),
 	}
 	output7 := provider.BitcoinOutputDetails{
 		Address: multiSigAddress2,
-		Value:   big.NewInt(121384),
+		Value:   big.NewInt(1000),
 	}
 
 	// Well, now it is clear to whom we are going to pay the amount
@@ -300,6 +300,7 @@ func ExampleMultiSigTransactionSpending() {
 		fmt.Println("oh we have some error when build and sign transaction ", err)
 		return
 	}
+
 	// ok everything is fine and we need a transaction output for broadcasting
 	// We use the Serialize method to receive the transaction output
 	digest := transaction.Serialize()
@@ -323,7 +324,7 @@ func ExampleMultiSigTransactionSpending() {
 	fmt.Println("transaction size: ", transactionSize)
 
 	// now we send transaction to network
-	trId, err := api.SendRawTransaction(digest)
+	trId, err := provider.TestMempoolAccept([]interface{}{[]string{digest}})
 
 	if err != nil {
 		fmt.Println("something bad happen when sending transaction: ", err)

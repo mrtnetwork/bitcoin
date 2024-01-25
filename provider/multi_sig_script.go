@@ -2,6 +2,7 @@ package provider
 
 import (
 	"fmt"
+
 	"github.com/mrtnetwork/bitcoin/address"
 	"github.com/mrtnetwork/bitcoin/keypair"
 	"github.com/mrtnetwork/bitcoin/scripts"
@@ -114,7 +115,7 @@ func CreateMultiSignatureAddress(threshold int, signers MultiSignaturAddressSign
 	multiSigScript := []interface{}{fmt.Sprint("OP_", threshold)}
 	for i := 0; i < len(signers); i++ {
 		for w := 0; w < signers[i].Weight(); w++ {
-			multiSigScript = append(multiSigScript, signers[i].PublicKey)
+			multiSigScript = append(multiSigScript, signers[i].PublicKey())
 		}
 	}
 	multiSigScript = append(multiSigScript, []interface{}{fmt.Sprint("OP_", sumWeight), "OP_CHECKMULTISIG"}...)
