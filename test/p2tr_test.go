@@ -1,13 +1,14 @@
 package test
 
 import (
+	"math/big"
+	"strings"
+	"testing"
+
 	"github.com/mrtnetwork/bitcoin/address"
 	"github.com/mrtnetwork/bitcoin/constant"
 	"github.com/mrtnetwork/bitcoin/keypair"
 	"github.com/mrtnetwork/bitcoin/scripts"
-	"math/big"
-	"strings"
-	"testing"
 )
 
 func TestCreateP2trWithSingleTapScript(t *testing.T) {
@@ -58,6 +59,10 @@ func TestCreateP2trWithSingleTapScript(t *testing.T) {
 		if !strings.EqualFold(digestHex, signedTx2) {
 			t.Errorf("Expected %v, but got %v", signedTx2, digestHex)
 		}
+		fromRaw, _ := scripts.BtcTransactionFromRaw(tx.Serialize())
+		if !strings.EqualFold(fromRaw.TxId(), tx.TxId()) {
+			t.Errorf("Expected %v, but got %v", tx.TxId(), fromRaw.Serialize())
+		}
 
 	})
 	// 3-spend taproot from script path (has single tapleaf script for spending)
@@ -73,6 +78,10 @@ func TestCreateP2trWithSingleTapScript(t *testing.T) {
 		digestHex := tx.Serialize()
 		if !strings.EqualFold(digestHex, signedTx3) {
 			t.Errorf("Expected %v, but got %v", signedTx2, digestHex)
+		}
+		fromRaw, _ := scripts.BtcTransactionFromRaw(tx.Serialize())
+		if !strings.EqualFold(fromRaw.TxId(), tx.TxId()) {
+			t.Errorf("Expected %v, but got %v", tx.TxId(), fromRaw.Serialize())
 		}
 
 	})
@@ -113,6 +122,10 @@ func TestCreateP2trWithTwoTapScripts(t *testing.T) {
 		tx.Witnesses = append(tx.Witnesses, witness)
 		if !strings.EqualFold(tx.Serialize(), signedTx3) {
 			t.Errorf("Expected %v, but got %v", signedTx3, tx.Serialize())
+		}
+		fromRaw, _ := scripts.BtcTransactionFromRaw(tx.Serialize())
+		if !strings.EqualFold(fromRaw.TxId(), tx.TxId()) {
+			t.Errorf("Expected %v, but got %v", tx.TxId(), fromRaw.Serialize())
 		}
 
 	})
@@ -157,6 +170,10 @@ func TestCreateP2trWithThreeTapScripts(t *testing.T) {
 		tx.Witnesses = append(tx.Witnesses, witness)
 		if !strings.EqualFold(tx.Serialize(), signedTx3) {
 			t.Errorf("Expected %v, but got %v", signedTx3, tx.Serialize())
+		}
+		fromRaw, _ := scripts.BtcTransactionFromRaw(tx.Serialize())
+		if !strings.EqualFold(fromRaw.TxId(), tx.TxId()) {
+			t.Errorf("Expected %v, but got %v", tx.TxId(), fromRaw.Serialize())
 		}
 
 	})

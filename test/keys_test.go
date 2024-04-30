@@ -102,7 +102,7 @@ func TestP2pkhAddresses(t *testing.T) {
 		if err == nil {
 			fmt.Println(tx.Program().Hash160 == hash160)
 		} else {
-			print(err.Error())
+			t.Errorf(err.Error())
 		}
 
 	})
@@ -234,7 +234,6 @@ func TestP2trAddresses(t *testing.T) {
 	t.Run("t7", func(t *testing.T) {
 		pub := privOdd.GetPublic()
 		program := pub.ToTaprootAddress().Program().Program
-		fmt.Println("program: ", program)
 		if !strings.EqualFold(program, correctOddTweakedPk) {
 			t.Errorf("Expected %v, but got %v", correctOddTweakedPk, program)
 		}

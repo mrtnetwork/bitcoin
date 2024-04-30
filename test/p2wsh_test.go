@@ -1,13 +1,14 @@
 package test_test
 
 import (
+	"math/big"
+	"strings"
+	"testing"
+
 	"github.com/mrtnetwork/bitcoin/address"
 	"github.com/mrtnetwork/bitcoin/constant"
 	"github.com/mrtnetwork/bitcoin/keypair"
 	"github.com/mrtnetwork/bitcoin/scripts"
-	"math/big"
-	"strings"
-	"testing"
 )
 
 func TestP2WSH(t *testing.T) {
@@ -32,8 +33,7 @@ func TestP2WSH(t *testing.T) {
 	txin1Multiple := scripts.NewDefaultTxInput("24d949f8c77d7fc0cd09c8d5fccf7a0249178c16170c738da19f6c4b176c9f4b", 0)
 	txin2Multiple := scripts.NewDefaultTxInput("65f4d69c91a8de54dc11096eaa315e84ef91a389d1d1c17a691b72095100a3a4", 0)
 	txin3Multiple := scripts.NewDefaultTxInput("6c8fc6453a2a3039c2b5b55dcc59587e8b0afa52f92607385b5f4c7e84f38aa2", 0)
-	// txin2MultipleAmount := big.NewInt(690000)
-	// txin3MultipleAmount := big.NewInt(790000)
+
 	output1Multiple := scripts.NewTxOutput(big.NewInt(100000), p2wshAddr.Program().ToScriptPubKey())
 	output2Multiple := scripts.NewTxOutput(big.NewInt(100000), sk1.GetPublic().ToSegwitAddress(true).Program().ToScriptPubKey())
 	output3Multiple := scripts.NewTxOutput(big.NewInt(1770000), p2pkhAddr.Program().ToScriptPubKey())
@@ -52,6 +52,10 @@ func TestP2WSH(t *testing.T) {
 		if !strings.EqualFold(tx.Serialize(), createSendToP2pkhResult) {
 			t.Errorf("Expected %v, but got %v", createSendToP2pkhResult, tx.Serialize())
 		}
+		fromRaw, _ := scripts.BtcTransactionFromRaw(tx.Serialize())
+		if !strings.EqualFold(fromRaw.TxId(), tx.TxId()) {
+			t.Errorf("Expected %v, but got %v", tx.TxId(), fromRaw.Serialize())
+		}
 
 	})
 	t.Run("spend_from_p2wsh_multisig_to_p2pkh", func(t *testing.T) {
@@ -66,6 +70,10 @@ func TestP2WSH(t *testing.T) {
 		tx.Witnesses = append(tx.Witnesses, witness)
 		if !strings.EqualFold(tx.Serialize(), spendP2pkhResult) {
 			t.Errorf("Expected %v, but got %v", spendP2pkhResult, tx.Serialize())
+		}
+		fromRaw, _ := scripts.BtcTransactionFromRaw(tx.Serialize())
+		if !strings.EqualFold(fromRaw.TxId(), tx.TxId()) {
+			t.Errorf("Expected %v, but got %v", tx.TxId(), fromRaw.Serialize())
 		}
 
 	})
@@ -98,6 +106,10 @@ func TestP2WSH(t *testing.T) {
 		tx.Witnesses = append(tx.Witnesses, witnesss3)
 		if !strings.EqualFold(tx.Serialize(), multipleInputMultipleOuputResult) {
 			t.Errorf("Expected %v, but got %v", multipleInputMultipleOuputResult, tx.Serialize())
+		}
+		fromRaw, _ := scripts.BtcTransactionFromRaw(tx.Serialize())
+		if !strings.EqualFold(fromRaw.TxId(), tx.TxId()) {
+			t.Errorf("Expected %v, but got %v", tx.TxId(), fromRaw.Serialize())
 		}
 
 	})

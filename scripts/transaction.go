@@ -1,10 +1,11 @@
 package scripts
 
 import (
+	"math/big"
+
 	"github.com/mrtnetwork/bitcoin/constant"
 	"github.com/mrtnetwork/bitcoin/digest"
 	"github.com/mrtnetwork/bitcoin/formating"
-	"math/big"
 )
 
 // Define BtcTransaction struct
@@ -95,37 +96,37 @@ func (tx *BtcTransaction) Copy() *BtcTransaction {
 	}
 }
 func BtcTransactionFromRaw(raw string) (*BtcTransaction, error) {
-	rawtx := formating.HexToBytes(raw)
+	txBytes := formating.HexToBytes(raw)
 	cursor := 4
 	var flag []byte
 	hasSegwit := false
 
-	if rawtx[4] == 0 {
-		flag = rawtx[5:6]
+	if txBytes[4] == 0 {
+		flag = txBytes[5:6]
 		if flag[0] == 1 {
 			hasSegwit = true
 		}
 		cursor += 2
 	}
 
-	vi, viCursor := formating.ViToInt(rawtx[cursor:])
+	vi, viCursor := formating.ViToInt(txBytes[cursor:])
 	cursor += viCursor
 
 	inputs := make([]*TxInput, vi)
 	for index := 0; index < len(inputs); index++ {
-		inp, inpCursor, err := TxInputFromRaw(raw, cursor, hasSegwit)
+		inp, inpCursor, err := TxInputFromRaw(txBytes, cursor, hasSegwit)
 		if err != nil {
 			return nil, err
 		}
 		inputs[index] = inp
 		cursor = inpCursor
 	}
-	viOut, viOutCursor := formating.ViToInt(rawtx[cursor:])
+	viOut, viOutCursor := formating.ViToInt(txBytes[cursor:])
 	cursor += viOutCursor
 
 	outputs := make([]*TxOutput, viOut)
 	for index := 0; index < len(outputs); index++ {
-		out, outCursor, err := TxOutputFromRaw(raw, cursor, hasSegwit)
+		out, outCursor, err := TxOutputFromRaw(txBytes, cursor, hasSegwit)
 		if err != nil {
 			return nil, err
 		}
@@ -135,14 +136,14 @@ func BtcTransactionFromRaw(raw string) (*BtcTransaction, error) {
 	witnesses := make([]TxWitnessInput, len(inputs))
 	if hasSegwit {
 		for n := 0; n < len(inputs); n++ {
-			wVi, wViCursor := formating.ViToInt(rawtx[cursor:])
+			wVi, wViCursor := formating.ViToInt(txBytes[cursor:])
 			cursor += wViCursor
 			witnessesTmp := make([]string, wVi)
 			for m := 0; m < len(witnessesTmp); m++ {
 				var witness []byte
-				wtVi, wtViCursor := formating.ViToInt(rawtx[cursor:])
+				wtVi, wtViCursor := formating.ViToInt(txBytes[cursor:])
 				if wtVi != 0 {
-					witness = rawtx[cursor+wtViCursor : cursor+wtViCursor+wtVi]
+					witness = txBytes[cursor+wtViCursor : cursor+wtViCursor+wtVi]
 				}
 				cursor += wtViCursor + wtVi
 				witnessesTmp[m] = formating.BytesToHex(witness)

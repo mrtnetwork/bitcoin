@@ -2,8 +2,9 @@ package scripts
 
 import (
 	"encoding/binary"
-	"github.com/mrtnetwork/bitcoin/formating"
 	"math/big"
+
+	"github.com/mrtnetwork/bitcoin/formating"
 )
 
 type TxOutput struct {
@@ -42,19 +43,19 @@ func (txOutput *TxOutput) ToBytes() []byte {
 // raw The hexadecimal raw string of the Transaction
 // The cursor of which the algorithm will start to read the data
 // hasSegwit  Is the Tx Output segwit or not
-func TxOutputFromRaw(raw string, cursor int, hasSegwit bool) (*TxOutput, int, error) {
-	rawBytes := formating.HexToBytes(raw)
+func TxOutputFromRaw(outputBytes []byte, cursor int, hasSegwit bool) (*TxOutput, int, error) {
+
 	// Parse TxOutput from raw bytes
-	value := int64(binary.LittleEndian.Uint64(rawBytes[cursor : cursor+8]))
+	value := int64(binary.LittleEndian.Uint64(outputBytes[cursor : cursor+8]))
 	cursor += 8
 
-	vi, viSize := formating.ViToInt(rawBytes[cursor:])
+	vi, viSize := formating.ViToInt(outputBytes[cursor:])
 	cursor += viSize
 
-	lockScript := rawBytes[cursor : cursor+vi]
+	lockScript := outputBytes[cursor : cursor+vi]
 	cursor += vi
 
-	scriptPubKey, err := ScriptFromRaw(formating.BytesToHex(lockScript), hasSegwit)
+	scriptPubKey, err := ScriptFromRaw(lockScript, hasSegwit)
 	if err != nil {
 		return nil, cursor, err
 	}

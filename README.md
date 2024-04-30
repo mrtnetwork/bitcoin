@@ -1,4 +1,5 @@
 # BITCOIN GO Package
+
 a comprehensive and versatile Go library for all your Bitcoin transaction needs. offers robust support for various Bitcoin transaction types, including spending transactions, Bitcoin address management, Bitcoin Schnorr signatures, BIP-39 mnemonic phrase generation, hierarchical deterministic (HD) wallet derivation, and Web3 Secret Storage Definition.
 
 This package was inspired by the [python-bitcoin-utils](https://github.com/karask/python-bitcoin-utils) package and turned into GO
@@ -6,6 +7,7 @@ This package was inspired by the [python-bitcoin-utils](https://github.com/karas
 ## Features
 
 ### Transaction Types
+
 This comprehensive package provides robust support for a wide array of Bitcoin transaction types, encompassing the full spectrum of Bitcoin transaction capabilities. Whether you need to execute standard payments, facilitate complex multi-signature wallets, leverage Segregated Witness (SegWit) transactions for lower fees and enhanced scalability, or embrace the privacy and flexibility of Pay-to-Taproot (P2TR) transactions, this package has you covered. Additionally, it empowers users to engage in legacy transactions, create time-locked transactions, and harness the security of multisignature (multisig) transactions. With this package, you can seamlessly navigate the diverse landscape of Bitcoin transactions, ensuring your interactions with the Bitcoin network are secure, efficient, and tailored to your specific needs.
 
 - P2PKH (Pay-to-Public-Key-Hash): The most common transaction type, it sends funds to a recipient's public key hash. Provides security and anonymity.
@@ -29,12 +31,15 @@ This comprehensive package provides robust support for a wide array of Bitcoin t
 - Coinbase Transactions: The first transaction in each block, generating new Bitcoins as a block reward for miners. It includes the miner's payout address.
 
 ### Create Transaction
+
 Using this package, you can create a Bitcoin transaction in two ways: either through the `BtcTransaction` struct or the `BitcoinTransactionBuilder` struct
+
 - BtcTransaction: To use the `BtcTransaction` struct, you should have a general understanding of how Bitcoin transactions work, including knowledge of UTXOs, scripts, various types of scripts, Bitcoin addresses, signatures, and more. We created examples and tests to enhance your understanding. An example of this transaction type is explained below, and you can also find numerous examples in the [`test`](https://github.com/mrtnetwork/bitcoin/tree/main/test) folder.
 
 - BitcoinTransactionBuilder: Even with limited prior knowledge, you can utilize this class to send various types of transactions. Below, I've provided an example in which a transaction features 8 distinct input addresses with different types and private keys, as well as 10 different output addresses. Furthermore, additional examples have been prepared, which you can find in the [`example`](https://github.com/mrtnetwork/bitcoin/tree/main/example) folder.
 
 ### Addresses
+
 - P2PKH A P2PKH (Pay-to-Public-Key-Hash) address in Bitcoin represents ownership of a cryptocurrency wallet by encoding a hashed public key
   
 - P2WPKH: A P2WPKH (Pay-to-Witness-Public-Key-Hash) address in Bitcoin is a Segregated Witness (SegWit) address that enables more efficient and secure transactions by segregating witness data, enhancing network scalability and security.
@@ -48,28 +53,32 @@ Using this package, you can create a Bitcoin transaction in two ways: either thr
 - P2SH(SEGWIT): A P2SH (Pay-to-Script-Hash) Segregated Witness (SegWit) address in Bitcoin combines the benefits of P2SH and SegWit technologies, allowing for enhanced transaction security, reduced fees, and improved scalability.
 
 ### Sign
+
 - Sign message: ECDSA Signature Algorithm
   
 - Sign Segwit(v0) and legacy transaction: ECDSA Signature Algorithm
   
 - Sign Taproot transaction
   
-  - Script Path and TapTweak: Taproot allows for multiple script paths (smart contract conditions) to be included in a single transaction. The "taptweak" ensures that the correct 	 
+  - Script Path and TapTweak: Taproot allows for multiple script paths (smart contract conditions) to be included in a single transaction. The "taptweak" ensures that the correct
     script path is used when spending. This enhances privacy by making it difficult to determine the spending conditions from the transaction.
-    
-  - Schnorr Signatures: While ECDSA is still used for Taproot, it also provides support for Schnorr signatures. Schnorr signatures offer benefits such as smaller signature sizes and 	 
+
+  - Schnorr Signatures: While ECDSA is still used for Taproot, it also provides support for Schnorr signatures. Schnorr signatures offer benefits such as smaller signature sizes and
     signature aggregation, contributing to improved scalability and privacy.
-    
-  - Schnorr-Musig: Taproot can leverage Schnorr-Musig, a technique for securely aggregating multiple signatures into a single signature. This feature enables collaborative spending and 
+
+  - Schnorr-Musig: Taproot can leverage Schnorr-Musig, a technique for securely aggregating multiple signatures into a single signature. This feature enables collaborative spending and
     enhances privacy.
 
 ### BIP-39
+
 - Generate BIP39 mnemonics, providing a secure and standardized way to manage keys and seed phrases
 
 ### HD Wallet
+
 - Implement hierarchical deterministic (HD) wallet derivation
 
 ### Web3 Secret Storage Definition
+
 - JSON Format: Private keys are stored in a JSON (JavaScript Object Notation) format, making it easy to work with in various programming languages.
   
 - Encryption: The private key is encrypted using the user's chosen password. This ensures that even if the JSON file is compromised, an attacker cannot access the private key without the password.
@@ -87,13 +96,16 @@ Using this package, you can create a Bitcoin transaction in two ways: either thr
 - Metadata: Additional metadata, such as the address associated with the private key, may be included in the JSON file.
 
 ### Node Provider
+
 We have added two APIs (Mempool and BlockCypher) to the plugin for network access. You can easily use these two APIs to obtain information such as unspent transactions (UTXO), network fees, sending transactions, receiving transaction information, and retrieving account transactions.
 
 ## EXAMPLES
 
 ### Key and addresses
-  - Private key
-    ```
+
+- Private key
+
+    ```go
     // Create an EC private key instance from a WIF (Wallet Import Format) encoded string.
     privateKey, _ := keypair.NewECPrivateFromWIF("cT33CWKwcV8afBs5NYzeSzeSoGETtAB8izjDjMEuGqyqPoF7fbQR")
 
@@ -113,59 +125,65 @@ We have added two APIs (Mempool and BlockCypher) to the plugin for network acces
     // Convert the private key to its hexadecimal representation.
     toHex := privateKey.ToHex()
     ```
+
 - Public key
+
+```go
+
+ // Create an instance of an EC public key from a hexadecimal representation.
+ publicKey, _ := keypair.NewECPPublicFromHex()
+
+ // Generate a Pay-to-Public-Key-Hash (P2PKH) address from the public key.
+ p2pkh := publicKey.ToAddress()
+
+ // Generate a Pay-to-Witness-Public-Key-Hash (P2WPKH) Segregated Witness (SegWit) address from the public key.
+ p2wpkh := publicKey.ToSegwitAddress()
+
+ // Generate a Pay-to-Witness-Script-Hash (P2WSH) Segregated Witness (SegWit) address from the public key.
+ p2wsh := publicKey.ToP2WSHAddress()
+
+ // Generate a Taproot address from the public key.
+ p2tr := publicKey.ToTaprootAddress()
+
+ // Generate a Pay-to-Public-Key-Hash (P2PKH) inside Pay-to-Script-Hash (P2SH) address from the public key.
+ p2pkhInP2sh := publicKey.ToP2PKHInP2SH()
+
+ // Generate a Pay-to-Witness-Public-Key-Hash (P2WPKH) inside Pay-to-Script-Hash (P2SH) address from the public key.
+ p2wpkhInP2sh := publicKey.ToP2WPKHInP2SH()
+
+ // Generate a Pay-to-Witness-Script-Hash (P2WSH) inside Pay-to-Script-Hash (P2SH) address from the public key.
+ p2wshInP2sh := publicKey.ToP2WSHInP2SH()
+
+ // Generate a Pay-to-Public-Key (P2PK) inside Pay-to-Script-Hash (P2SH) address from the public key.
+ p2pkInP2sh := publicKey.ToP2PKInP2SH()
+
+ // Get the compressed bytes representation of the public key.
+ compressedBytes := publicKey.ToCompressedBytes()
+
+ // Get the uncompressed bytes representation of the public key.
+ unCompressedBytes := publicKey.ToUnCompressedBytes(true)
+
+ // extracts and returns the x-coordinate (first 32 bytes) of the ECPublic key
+ // as a hexadecimal string.
+ onlyX := publicKey.ToXOnlyHex()
+
+ // CalculateTweak computes and returns the TapTweak value based on the ECPublic key
+ // and an optional script. It uses the key's x-coordinate and the Merkle root of the script
+ // (if provided) to calculate the tweak.
+ tweak, _ := publicKey.CalculateTweak(scripts.Script{})
+ 
+ // computes and returns the Taproot commitment point's x-coordinate
+ // derived from the ECPublic key and an optional script, represented as a hexadecimal string.
+ taproot, _ := publicKey.ToTapRotHex([]interface{}{})
+
+ // Verify verifies a signature against a message
+ verify := publicKey.Verify()
+
   ```
-	// Create an instance of an EC public key from a hexadecimal representation.
-	publicKey, _ := keypair.NewECPPublicFromHex()
 
-	// Generate a Pay-to-Public-Key-Hash (P2PKH) address from the public key.
-	p2pkh := publicKey.ToAddress()
-
-	// Generate a Pay-to-Witness-Public-Key-Hash (P2WPKH) Segregated Witness (SegWit) address from the public key.
-	p2wpkh := publicKey.ToSegwitAddress()
-
-	// Generate a Pay-to-Witness-Script-Hash (P2WSH) Segregated Witness (SegWit) address from the public key.
-	p2wsh := publicKey.ToP2WSHAddress()
-
-	// Generate a Taproot address from the public key.
-	p2tr := publicKey.ToTaprootAddress()
-
-	// Generate a Pay-to-Public-Key-Hash (P2PKH) inside Pay-to-Script-Hash (P2SH) address from the public key.
-	p2pkhInP2sh := publicKey.ToP2PKHInP2SH()
-
-	// Generate a Pay-to-Witness-Public-Key-Hash (P2WPKH) inside Pay-to-Script-Hash (P2SH) address from the public key.
-	p2wpkhInP2sh := publicKey.ToP2WPKHInP2SH()
-
-	// Generate a Pay-to-Witness-Script-Hash (P2WSH) inside Pay-to-Script-Hash (P2SH) address from the public key.
-	p2wshInP2sh := publicKey.ToP2WSHInP2SH()
-
-	// Generate a Pay-to-Public-Key (P2PK) inside Pay-to-Script-Hash (P2SH) address from the public key.
-	p2pkInP2sh := publicKey.ToP2PKInP2SH()
-
-	// Get the compressed bytes representation of the public key.
-	compressedBytes := publicKey.ToCompressedBytes()
-
-	// Get the uncompressed bytes representation of the public key.
-	unCompressedBytes := publicKey.ToUnCompressedBytes(true)
-
-	// extracts and returns the x-coordinate (first 32 bytes) of the ECPublic key
-	// as a hexadecimal string.
-	onlyX := publicKey.ToXOnlyHex()
-
-	// CalculateTweak computes and returns the TapTweak value based on the ECPublic key
-	// and an optional script. It uses the key's x-coordinate and the Merkle root of the script
-	// (if provided) to calculate the tweak.
-	tweak, _ := publicKey.CalculateTweak(scripts.Script{})
-	
-	// computes and returns the Taproot commitment point's x-coordinate
-	// derived from the ECPublic key and an optional script, represented as a hexadecimal string.
-	taproot, _ := publicKey.ToTapRotHex([]interface{}{})
-
-	// Verify verifies a signature against a message
-	verify := publicKey.Verify()
-  ```
 - Addresses
-  ```
+
+  ```go
   // The `...FromAddress` methods only check the address and return an error if it does not belong to Bitcoin.
   // If you also want to verify that the address belongs to a specific network,
   // please select the desired network using the parameters.
@@ -216,8 +234,10 @@ We have added two APIs (Mempool and BlockCypher) to the plugin for network acces
   ```
   
 ### Transaction
+
 - With TransactionBuilder
-  ```
+
+  ```go
   // spending from 3 private key with 8 different address to 10 address
   // network
   network := address.TestnetNetwork
@@ -283,43 +303,44 @@ We have added two APIs (Mempool and BlockCypher) to the plugin for network acces
   // now we chose some address for spending from multiple address
   // i use some different address type for this
   spenders := []provider.UtxoOwnerDetails{
-  	{PublicKey: public1.ToHex(), Address: exampleAddr1}, // p2pkh address from public1
-  	{PublicKey: public2.ToHex(), Address: exampleAddr2}, // P2TRAddress address from public2
-  	{PublicKey: public3.ToHex(), Address: exampleAddr7}, // P2SH(P2WPKH) address from public3
-  	{PublicKey: public3.ToHex(), Address: exampleAddr9},
-  	{PublicKey: public3.ToHex(), Address: exampleAddr10},
-  	{PublicKey: public2.ToHex(), Address: exampleAddr3}, // P2SH(P2PKH) address public2
-  	{PublicKey: public4.ToHex(), Address: exampleAddr8}, // P2SH(P2PKH) address public2
-  	{PublicKey: public3.ToHex(), Address: exampleAddr4}, // p2pkh address from public1
-	}
+   {PublicKey: public1.ToHex(), Address: exampleAddr1}, // p2pkh address from public1
+   {PublicKey: public2.ToHex(), Address: exampleAddr2}, // P2TRAddress address from public2
+   {PublicKey: public3.ToHex(), Address: exampleAddr7}, // P2SH(P2WPKH) address from public3
+   {PublicKey: public3.ToHex(), Address: exampleAddr9},
+   {PublicKey: public3.ToHex(), Address: exampleAddr10},
+   {PublicKey: public2.ToHex(), Address: exampleAddr3}, // P2SH(P2PKH) address public2
+   {PublicKey: public4.ToHex(), Address: exampleAddr8}, // P2SH(P2PKH) address public2
+   {PublicKey: public3.ToHex(), Address: exampleAddr4}, // p2pkh address from public1
+
+
   
   utxos := provider.UtxoWithOwnerList{}
 
   // i add some method for provider to read utxos from mempol or blockCypher
   // looping address to read Utxos
   for _, spender := range spenders {
-		// read ech address utxo from mempol
-		spenderUtxos, err := api.GetAccountUtxo(spender)
+  // read ech address utxo from mempol
+  spenderUtxos, err := api.GetAccountUtxo(spender)
 
-		// oh this address does not have any satoshi for spending
-		if !spenderUtxos.CanSpending() {
-			continue
-		}
-		// oh something bad happen when reading Utxos
-		if err != nil {
-			return
-		}
-		// we append address utxos to utxos list
-		utxos = append(utxos, spenderUtxos...)
-	}
+  // oh this address does not have any satoshi for spending
+  if !spenderUtxos.CanSpending() {
+   continue
+  }
+  // oh something bad happen when reading Utxos
+  if err != nil {
+   return
+  }
+  // we append address utxos to utxos list
+  utxos = append(utxos, spenderUtxos...)
+
   // Well, now we calculate how much we can spend
   sumOfUtxo := utxos.SumOfUtxosValue()
 
   hasSatoshi := sumOfUtxo.Cmp(big.NewInt(0)) != 0
 
   if !hasSatoshi {
-	// Are you kidding? We don't have btc to spend
-  	return
+  // Are you kidding? We don't have btc to spend
+   return
   }
 
   // 1817320 sum of all utxos
@@ -332,74 +353,74 @@ We have added two APIs (Mempool and BlockCypher) to the plugin for network acces
   // we create 8 different output with  different address type like (pt2r,p2sh(p2wpkh),p2sh(p2wsh),p2sh(p2pkh),p2sh(p2pk),p2pkh,p2wph,p2wsh and etc..)
   // We consider the spendable amount for 10 outputs and divide by 10, each output 176,732
   output1 := provider.BitcoinOutputDetails{
-  	Address: exampleAddr4,
-  	Value:   big.NewInt(176732),
+   Address: exampleAddr4,
+   Value:   big.NewInt(176732),
   }
   output2 := provider.BitcoinOutputDetails{
-  	Address: exampleAddr9,
-  	Value:   big.NewInt(176732),
+   Address: exampleAddr9,
+   Value:   big.NewInt(176732),
   }
   output3 := provider.BitcoinOutputDetails{
-  	Address: exampleAddr10,
-  	Value:   big.NewInt(176732),
+   Address: exampleAddr10,
+   Value:   big.NewInt(176732),
   }
   output4 := provider.BitcoinOutputDetails{
-  	Address: exampleAddr1,
-  	Value:   big.NewInt(176732),
+   Address: exampleAddr1,
+   Value:   big.NewInt(176732),
   }
   output5 := provider.BitcoinOutputDetails{
-  	Address: exampleAddr3,
-  	Value:   big.NewInt(176732),
+   Address: exampleAddr3,
+   Value:   big.NewInt(176732),
   }
   output6 := provider.BitcoinOutputDetails{
-  	Address: exampleAddr2,
-  	Value:   big.NewInt(176732),
+   Address: exampleAddr2,
+   Value:   big.NewInt(176732),
   }
   output7 := provider.BitcoinOutputDetails{
-  	Address: exampleAddr7,
-  	Value:   big.NewInt(176732),
+   Address: exampleAddr7,
+   Value:   big.NewInt(176732),
   }
   output8 := provider.BitcoinOutputDetails{
-  	Address: exampleAddr8,
-  	Value:   big.NewInt(176732),
+   Address: exampleAddr8,
+   Value:   big.NewInt(176732),
   }
   output9 := provider.BitcoinOutputDetails{
-  	Address: exampleAddr5,
-  	Value:   big.NewInt(176732),
+   Address: exampleAddr5,
+   Value:   big.NewInt(176732),
   }
   output10 := provider.BitcoinOutputDetails{
-  	Address: exampleAddr6,
-  	Value:   big.NewInt(176732),
+   Address: exampleAddr6,
+   Value:   big.NewInt(176732),
   }
 
   // Well, now it is clear to whom we are going to pay the amount
   // Now let's create the transaction
   transactionBuilder := provider.NewBitcoinTransactionBuilder(
-  	// Now, we provide the UTXOs we want to spend.
-  	utxos,
+   // Now, we provide the UTXOs we want to spend.
+   utxos,
 
-  	// We select transaction outputs
-  	[]provider.BitcoinOutputDetails{output1, output2, output3, output4, output5, output6, output7, output8, output9, output10},
+   // We select transaction outputs
+   []provider.BitcoinOutputDetails{output1, output2, output3, output4, output5, output6, output7, output8, output9, output10},
 
-  	// Transaction fee
-  	// Ensure that you have accurately calculated the amounts.
-  	// If the sum of the outputs, including the transaction fee,
-  	// does not match the total amount of UTXOs,
-  	// it will result in an error. Please double-check your calculations.
+   // Transaction fee
+   // Ensure that you have accurately calculated the amounts.
+   // If the sum of the outputs, including the transaction fee,
+   // does not match the total amount of UTXOs,
+   // it will result in an error. Please double-check your calculations.
 
-  	FEE,
-  	// network (address.BitcoinNetwork ,ddress.TestnetNetwork)
-  	&network,
+   FEE,
+   // network (address.BitcoinNetwork ,ddress.TestnetNetwork)
+   &network,
 
-  	// If you like the note write something else and leave it blank
-  	// I will put my GitHub address here
-  	"https://github.com/mrtnetwork",
+   // If you like the note write something else and leave it blank
+   // I will put my GitHub address here
+   "https://github.com/mrtnetwork",
   
-  	// RBF, or Replace-By-Fee, is a feature in Bitcoin that allows you to increase the fee of an unconfirmed
-  	// transaction that you've broadcasted to the network.
-  	// This feature is useful when you want to speed up a
-  	// transaction that is taking longer than expected to get confirmed due to low transaction fees.
-  	true,
+   // RBF, or Replace-By-Fee, is a feature in Bitcoin that allows you to increase the fee of an unconfirmed
+   // transaction that you've broadcasted to the network.
+   // This feature is useful when you want to speed up a
+   // transaction that is taking longer than expected to get confirmed due to low transaction fees.
+   true,
   )
 
   // now we use BuildTransaction to complete them
@@ -419,51 +440,51 @@ We have added two APIs (Mempool and BlockCypher) to the plugin for network acces
   // This TransactionBuilder only works with SIGHASH_ALL and TAPROOT_SIGHASH_ALL for taproot input
   // If you want to use another sighash, you should create another TransactionBuilder
   transaction, err := transactionBuilder.BuildTransaction(func(trDigest []byte, utxo provider.UtxoWithOwner, multiSigPublicKey string) (string, error) {
-  	var key keypair.ECPrivate
+   var key keypair.ECPrivate
 
-  	currentPublicKey := utxo.OwnerDetails.PublicKey
-  	if utxo.IsMultiSig() {
-  	currentPublicKey = multiSigPublicKey
-  	}
-  	// ok we have the public key of the current UTXO and we use some conditions to find private  key and sign transaction
-  	switch currentPublicKey {
-  	case public3.ToHex():
-  		{
-  			key = *private3
-  		}
-  	case public2.ToHex():
-  		{
-  			key = *private2
-  		}
+   currentPublicKey := utxo.OwnerDetails.PublicKey
+   if utxo.IsMultiSig() {
+   currentPublicKey = multiSigPublicKey
+   }
+   // ok we have the public key of the current UTXO and we use some conditions to find private  key and sign transaction
+   switch currentPublicKey {
+   case public3.ToHex():
+    {
+     key = *private3
+    }
+   case public2.ToHex():
+    {
+     key = *private2
+    }
 
-  	case public1.ToHex():
-  		{
-  			key = *private1
-  		}
-  	case public4.ToHex():
-  		{
-  			key = *private4
-  		}
-  	default:
-  		{
-  		return "", fmt.Errorf("cannot find private key")
-  		}
-  	}
-  	// Ok, now we have the private key, we need to check which method to use for signing
-  	// We check whether the UTX corresponds to the P2TR address or not.
-  	if utxo.Utxo.IsP2tr() {
-  		// yes is p2tr utxo and now we use SignTaprootTransaction(Schnorr sign)
-  		// for now this transaction builder support only tweak transaction
-  		return key.SignTaprootTransaction(
-  			trDigest, constant.TAPROOT_SIGHASH_ALL, []interface{}{}, true,
-  		), nil
-  	}
-  		// is seqwit(v0) or lagacy address we use  SingInput (ECDSA)
-  		return key.SingInput(trDigest, constant.SIGHASH_ALL), nil
-	})
+   case public1.ToHex():
+    {
+     key = *private1
+    }
+   case public4.ToHex():
+    {
+     key = *private4
+    }
+   default:
+    {
+    return "", fmt.Errorf("cannot find private key")
+    }
+   }
+   // Ok, now we have the private key, we need to check which method to use for signing
+   // We check whether the UTX corresponds to the P2TR address or not.
+   if utxo.Utxo.IsP2tr() {
+    // yes is p2tr utxo and now we use SignTaprootTransaction(Schnorr sign)
+    // for now this transaction builder support only tweak transaction
+    return key.SignTaprootTransaction(
+     trDigest, constant.TAPROOT_SIGHASH_ALL, []interface{}{}, true,
+    ), nil
+   }
+    // is seqwit(v0) or lagacy address we use  SingInput (ECDSA)
+    return key.SingInput(trDigest, constant.SIGHASH_ALL), nil
+  })
 
   if err != nil {
-  	return
+   return
   }
   // ok everything is fine and we need a transaction output for broadcasting
   // We use the Serialize method to receive the transaction output
@@ -480,24 +501,26 @@ We have added two APIs (Mempool and BlockCypher) to the plugin for network acces
   var transactionSize int
 
   if isSegwitTr {
-  	transactionSize = transaction.GetVSize()
+   transactionSize = transaction.GetVSize()
   } else {
-  	transactionSize = transaction.GetSize()
+   transactionSize = transaction.GetSize()
   }
     
   // now we send transaction to network
   trId, err := api.SendRawTransaction(digest)
 
   if err != nil {
-  	return
+   return
   }
   // Yes, we did :)  5015a7748d8d6df47358902b6cdc6d77ef839945c479924f4592fd89315ac0e0
   // Now we check Mempol for what happened https://mempool.space/testnet/tx/5015a7748d8d6df47358902b6cdc6d77ef839945c479924f4592fd89315ac0e0
 
   ```
+
 - With BtcTransaction
   - Spend P2TR UTXO
-    ```
+
+    ```go
     // Private key of the UTXO owner
     privateKey, _ := keypair.NewECPrivateFromWIF("cRvyLwCPLU88jsyj94L7iJjQX5C2f8koG4G2gevN4BeSGcEvfKe9")
 
@@ -513,16 +536,16 @@ We have added two APIs (Mempool and BlockCypher) to the plugin for network acces
 
     // Create an output: Send 3000 to `n4bkvTyU1dVdzsrhWBqBw8fEMbHjJvtmJR`
     txout := scripts.NewTxOutput(
-		big.NewInt(3000),
-		addr.ToScriptPubKey(),
-	)
+    big.NewInt(3000),
+    addr.ToScriptPubKey(),
+    )
 
     // Create a transaction
     tx := scripts.NewBtcTransaction(
-		[]*scripts.TxInput{sigTxin1},
-		[]*scripts.TxOutput{txout},
-		true, // The transaction contains one or more segwit UTXOs
-	)
+    []*scripts.TxInput{sigTxin1},
+    []*scripts.TxOutput{txout},
+    true, // The transaction contains one or more segwit UTXOs
+    )
 
     // Get the transaction digest for signing input at index 0
     // Arguments:
@@ -553,10 +576,13 @@ We have added two APIs (Mempool and BlockCypher) to the plugin for network acces
 
     // Transaction digest ready for broadcast
     tx.Serialize()
-    
+
     ```
+
   - Spend P2PKH UTXO
-    ```
+
+    ```go
+
     // private key of UTXO owner
     privateKey, _ := keypair.NewECPrivateFromWIF("...")
     // address we want to spend
@@ -571,27 +597,27 @@ We have added two APIs (Mempool and BlockCypher) to the plugin for network acces
 
     // outputs 1 send 10000000 to `n4bkvTyU1dVdzsrhWBqBw8fEMbHjJvtmJR`
     txout := scripts.NewTxOutput(
-		big.NewInt(3000),
-		addr.ToScriptPubKey())
+    big.NewInt(3000),
+    addr.ToScriptPubKey())
 
     // We will return the spent transaction balance to the account holder
     changeTxout := scripts.NewTxOutput(
-		big.NewInt(29000000),
-		fromAddr.ToScriptPubKey(),
-    )
+    big.NewInt(29000000),
+    fromAddr.ToScriptPubKey(),
+     )
 
     // create transaction
     tx := scripts.NewBtcTransaction(
-		[]*scripts.TxInput{sigTxin1},
-		[]*scripts.TxOutput{txout, changeTxout},
-		false)
+    []*scripts.TxInput{sigTxin1},
+    []*scripts.TxOutput{txout, changeTxout},
+    false)
 
     // get transaction digest for signing input at index 0
     digest := tx.GetTransactionDigest(0, fromAddr.Program().ToScriptPubKey())
 
     // sign the transaction
     sig := privateKey.SingInput(digest)
-    
+
     // set unlock script to transaction
     tx.SetScriptSig(0, scripts.NewScript(sig, privateKey.GetPublic().ToHex()))
     // transaction id
@@ -602,14 +628,15 @@ We have added two APIs (Mempool and BlockCypher) to the plugin for network acces
     tx.Serialize()
     ```
   
-
 ### BIP39
-```
+
+```go
+
 // Create a new Bip39 instance with the desired language.
 // The default language is English. You can choose from various supported languages.
 // Language options include: English, Spanish, Portuguese, Korean, Japanese, Italian, French, Czech, ChineseTraditional, and ChineseSimplified.
 bip := bip39.Bip39{
-	Language: bip39.Japanese, // Set the language to Japanese
+ Language: bip39.Japanese, // Set the language to Japanese
 }
 
 // Generate a mnemonic phrase with the specified number of words.
@@ -631,14 +658,16 @@ toMnemonicFromEntropy, err := bip.EntropyToMnemonic(toEntropy)
 bip.ChangeLanguage(bip39.Italian)
 
 ```
-### HD Wallet
-```
+
+### HD-Wallet
+
+```go
 // Create a pointer to the Mainnet network
 network := &address.MainnetNetwork
 
 // Initialize a Bip39 instance with the Japanese language
 bip39Instance := bip39.Bip39{
-	Language: bip39.Japanese,
+ Language: bip39.Japanese,
 }
 
 // Generate a 24-word mnemonic using the Bip39 instance
@@ -678,14 +707,16 @@ publicKey := drivePrivateWallet.GetPublic()
 privateKey, _ := drivePrivateWallet.GetPrivate()
 
 ```
-### Web3 Secret Storage Definition
-```
+
+### Web3 Secret Storage Definition(KeyStore)
+
+```go
 // Create a pointer to the Mainnet network
 network := &address.MainnetNetwork
 
 // Initialize a Bip39 instance with the Japanese language
 bip39Instance := bip39.Bip39{
-	Language: bip39.Japanese,
+ Language: bip39.Japanese,
 }
 
 // Generate a 24-word mnemonic using the Bip39 instance
@@ -717,8 +748,10 @@ decodedWallet, _ := secretwallet.DecodeSecretWallet(encrypted, myPassword)
 newWallet, _ := hdwallet.FromXPrivateKey(decodedWallet.Credentials, true, network)
 
 ```
+
 ### Node provider
-```
+
+```go
 // select network testnet or mainnet
 network := address.TestnetNetwork
 
@@ -733,8 +766,8 @@ tr, e := api.GetTransaction("d4bad8e07d30ca4389ec8a203318aa523cc3e36c9730d0a6852
 // Read accounts UTXOS
 addr, _ := address.P2WPKHAddresssFromAddress("tb1q92nmnvhj04sqd4x7wjaewlt5jn8n3ngmplcymy")
 utxos, e := api.GetAccountUtxo(provider.UtxoOwnerDetails{
-	PublicKey: "",
-	Address:   addr,
+ PublicKey: "",
+ Address:   addr,
 })
 
 // Network fee
@@ -745,7 +778,7 @@ _, _ = api.SendRawTransaction("TRANSACTION DIGEST")
 
 // Read account transactions
 transaction, _ := api.GetAccountTransactions(addr.Show(network), func(url string) string {
-	return url
+ return url
 })
 
 ```
@@ -753,13 +786,11 @@ transaction, _ := api.GetAccountTransactions(addr.Show(network), func(url string
 ## Contributing
 
 Contributions are welcome! Please follow these guidelines:
- - Fork the repository and create a new branch.
- - Make your changes and ensure tests pass.
- - Submit a pull request with a detailed description of your changes.
 
-## Feature requests and bugs #
+- Fork the repository and create a new branch.
+- Make your changes and ensure tests pass.
+- Submit a pull request with a detailed description of your changes.
+
+## Feature requests and bugs
 
 Please file feature requests and bugs in the issue tracker.
-
-
-

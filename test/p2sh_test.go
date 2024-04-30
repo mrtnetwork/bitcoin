@@ -1,13 +1,14 @@
 package test
 
 import (
+	"math/big"
+	"strings"
+	"testing"
+
 	"github.com/mrtnetwork/bitcoin/address"
 	"github.com/mrtnetwork/bitcoin/constant"
 	"github.com/mrtnetwork/bitcoin/keypair"
 	"github.com/mrtnetwork/bitcoin/scripts"
-	"math/big"
-	"strings"
-	"testing"
 )
 
 func TestP2SH(t *testing.T) {
@@ -52,6 +53,10 @@ func TestP2SH(t *testing.T) {
 		if !strings.EqualFold(tx.Serialize(), createP2shAndSendResult) {
 			t.Errorf("Expected %v, but got %v", createP2shAndSendResult, tx.Serialize())
 		}
+		fromRaw, _ := scripts.BtcTransactionFromRaw(tx.Serialize())
+		if !strings.EqualFold(fromRaw.TxId(), tx.TxId()) {
+			t.Errorf("Expected %v, but got %v", tx.TxId(), fromRaw.Serialize())
+		}
 
 	})
 	t.Run("test2", func(t *testing.T) {
@@ -63,6 +68,10 @@ func TestP2SH(t *testing.T) {
 		tx.SetScriptSig(0, scripts.NewScript(sig, p2pkRedeemScript.ToHex()))
 		if !strings.EqualFold(tx.Serialize(), spendP2shResult) {
 			t.Errorf("Expected %v, but got %v", spendP2shResult, tx.Serialize())
+		}
+		fromRaw, _ := scripts.BtcTransactionFromRaw(tx.Serialize())
+		if !strings.EqualFold(fromRaw.TxId(), tx.TxId()) {
+			t.Errorf("Expected %v, but got %v", tx.TxId(), fromRaw.Serialize())
 		}
 
 	})
@@ -84,6 +93,10 @@ func TestP2SH(t *testing.T) {
 		tx.SetScriptSig(0, scripts.NewScript(sig, skCsvP2pkh.GetPublic().ToHex(), redeemScript.ToHex()))
 		if !strings.EqualFold(tx.Serialize(), spendP2shCsvP2pkhResult) {
 			t.Errorf("Expected %v, but got %v", spendP2shCsvP2pkhResult, tx.Serialize())
+		}
+		fromRaw, _ := scripts.BtcTransactionFromRaw(tx.Serialize())
+		if !strings.EqualFold(fromRaw.TxId(), tx.TxId()) {
+			t.Errorf("Expected %v, but got %v", tx.TxId(), fromRaw.Serialize())
 		}
 
 	})

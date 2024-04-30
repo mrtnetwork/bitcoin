@@ -52,46 +52,41 @@ func (s *Script) ToP2shScriptPubKey() *Script {
 }
 
 // Imports a Script commands list from raw hexadecimal data
-func ScriptFromRaw(hexData string, hasSegwit bool) (*Script, error) {
+func ScriptFromRaw(scriptBytes []byte, hasSegwit bool) (*Script, error) {
 	var commands []interface{}
 	index := 0
-	scriptraw, err := formating.HexToBytesCatch(hexData)
-	if err != nil {
-		return nil, fmt.Errorf("invalid script bytes")
-	}
-
-	for index < len(scriptraw) {
-		b := int(scriptraw[index])
+	for index < len(scriptBytes) {
+		b := int(scriptBytes[index])
 		if constant.CODE_OPS[b] != "" {
 			commands = append(commands, constant.CODE_OPS[b])
 			index++
 		} else if !hasSegwit && b == 0x4c {
-			bytesToRead := int(scriptraw[index+1])
+			bytesToRead := int(scriptBytes[index+1])
 			index++
-			data := scriptraw[index : index+bytesToRead]
+			data := scriptBytes[index : index+bytesToRead]
 			commands = append(commands, hex.EncodeToString(data))
 			index += bytesToRead
 		} else if !hasSegwit && b == 0x4d {
-			bytesToRead := int(binary.LittleEndian.Uint16(scriptraw[index+1 : index+3]))
+			bytesToRead := int(binary.LittleEndian.Uint16(scriptBytes[index+1 : index+3]))
 			index += 3
-			data := scriptraw[index : index+bytesToRead]
+			data := scriptBytes[index : index+bytesToRead]
 			commands = append(commands, hex.EncodeToString(data))
 			index += bytesToRead
 		} else if !hasSegwit && b == 0x4e {
-			bytesToRead := int(binary.LittleEndian.Uint32(scriptraw[index+1 : index+5]))
+			bytesToRead := int(binary.LittleEndian.Uint32(scriptBytes[index+1 : index+5]))
 			index += 5
-			data := scriptraw[index : index+bytesToRead]
+			data := scriptBytes[index : index+bytesToRead]
 			commands = append(commands, hex.EncodeToString(data))
 			index += bytesToRead
 		} else {
-			vi, size := formating.ViToInt(scriptraw[index:])
+			vi, size := formating.ViToInt(scriptBytes[index:])
 			dataSize := vi
 			// size := size
 			lastIndex := index + size + dataSize
-			if lastIndex > len(scriptraw) {
-				lastIndex = len(scriptraw)
+			if lastIndex > len(scriptBytes) {
+				lastIndex = len(scriptBytes)
 			}
-			commands = append(commands, hex.EncodeToString(scriptraw[index+size:lastIndex]))
+			commands = append(commands, hex.EncodeToString(scriptBytes[index+size:lastIndex]))
 			index += dataSize + size
 		}
 	}
@@ -100,8 +95,9 @@ func ScriptFromRaw(hexData string, hasSegwit bool) (*Script, error) {
 
 // GetScriptType determines the script type based on the provided hash and whether it has
 // SegWit data. It returns the identified ScriptType.
-func GetScriptType(hash string, hasSegwit bool) (ScriptType, error) {
-	s, err := ScriptFromRaw(hash, hasSegwit)
+func GetScriptType(scriptBytes []byte, hasSegwit bool) (ScriptType, error) {
+
+	s, err := ScriptFromRaw(scriptBytes, hasSegwit)
 	if err != nil {
 		return -1, err
 	}

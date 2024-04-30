@@ -1,10 +1,9 @@
 package test
 
 import (
-	"fmt"
-	"github.com/mrtnetwork/bitcoin/bip39"
-	"github.com/mrtnetwork/bitcoin/formating"
 	"testing"
+
+	"github.com/mrtnetwork/bitcoin/bip39"
 )
 
 func TestBip39(t *testing.T) {
@@ -26,13 +25,11 @@ func TestBip39(t *testing.T) {
 
 	// Select the desired number of words. 12(Words12), 15(Words15), 18(Words18), 21(Words21) or 24(Words24) words
 	mnemonic, err := bip.GenerateMnemonic(bip39.Words24)
-	fmt.Println("mnemonic: ", mnemonic)
 	if err != nil {
 		t.Errorf(err.Error())
 	}
 	// passphrase: An optional passphrase used for seed derivation. Can be an empty string.
-	toSeed := bip39.ToSeed(mnemonic, "PASSPHRASE")
-	fmt.Println("seed: ", formating.BytesToHex(toSeed))
+	_ = bip39.ToSeed(mnemonic, "PASSPHRASE")
 
 	toEntropy, err := bip.MnemonicToEntropy(mnemonic)
 	if err != nil {

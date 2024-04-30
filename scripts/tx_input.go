@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
+
 	"github.com/mrtnetwork/bitcoin/constant"
 	"github.com/mrtnetwork/bitcoin/formating"
 )
@@ -81,45 +82,41 @@ func (ti *TxInput) ToBytes() []byte {
 }
 
 // FromRaw parses a raw transaction input string into a TxInput
-func TxInputFromRaw(raw string, cursor int, hasSegwit bool) (*TxInput, int, error) {
-	txInputRaw, err := formating.HexToBytesCatch(raw)
-	if err != nil {
-		return nil, cursor, err
-	}
+func TxInputFromRaw(inputBytes []byte, cursor int, hasSegwit bool) (*TxInput, int, error) {
 
-	if cursor+32 >= len(txInputRaw) {
+	if cursor+32 >= len(inputBytes) {
 		return nil, cursor, fmt.Errorf("input transaction hash not found. Probably malformed raw transaction")
 	}
 
 	inpHash := make([]byte, 32)
-	copy(inpHash, formating.ReverseBytes(txInputRaw[cursor:cursor+32]))
+	copy(inpHash, formating.ReverseBytes(inputBytes[cursor:cursor+32]))
 	cursor += 32
 
-	if cursor+4 >= len(txInputRaw) {
+	if cursor+4 >= len(inputBytes) {
 		return nil, cursor, fmt.Errorf("output number not found. Probably malformed raw transaction")
 	}
 
-	outputN := binary.LittleEndian.Uint32(formating.ReverseBytes(txInputRaw[cursor : cursor+4]))
+	outputN := binary.LittleEndian.Uint32(inputBytes[cursor : cursor+4])
 	cursor += 4
 
-	vi, viSize := formating.ViToInt(txInputRaw[cursor:])
+	vi, viSize := formating.ViToInt(inputBytes[cursor:])
 	cursor += viSize
 
-	if cursor+vi > len(txInputRaw) {
+	if cursor+vi > len(inputBytes) {
 		return nil, cursor, fmt.Errorf("unlocking script length exceeds available data. Probably malformed raw transaction")
 	}
 
-	unlockingScript := txInputRaw[cursor : cursor+vi]
+	unlockingScript := inputBytes[cursor : cursor+vi]
 	cursor += vi
 
-	if cursor+4 > len(txInputRaw) {
+	if cursor+4 > len(inputBytes) {
 		return nil, cursor, fmt.Errorf("Sequence number not found. Probably malformed raw transaction")
 	}
 
-	sequenceNumberData := txInputRaw[cursor : cursor+4]
+	sequenceNumberData := inputBytes[cursor : cursor+4]
 	cursor += 4
 
-	script, err := ScriptFromRaw(formating.BytesToHex(unlockingScript), hasSegwit)
+	script, err := ScriptFromRaw(unlockingScript, hasSegwit)
 	if err != nil {
 		return nil, cursor, err
 	}

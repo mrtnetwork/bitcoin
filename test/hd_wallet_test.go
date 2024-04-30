@@ -1,10 +1,10 @@
 package test
 
 import (
-	"fmt"
+	"testing"
+
 	"github.com/mrtnetwork/bitcoin/address"
 	hdwallet "github.com/mrtnetwork/bitcoin/hd_wallet"
-	"testing"
 )
 
 func TestHDWallet(t *testing.T) {
@@ -72,7 +72,6 @@ func TestHDWallet(t *testing.T) {
 		}
 
 		p2wsh := publicKey.ToP2WSHAddress().Show(network)
-		fmt.Println("p2wsh: ", p2wsh)
 		if p2wsh != p2wshPublicWallet {
 			t.Errorf("Expected %v, but got %v", p2wshPublicWallet, p2wsh)
 		}

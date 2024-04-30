@@ -84,7 +84,7 @@ func (builder *BitcoinTransactionBuilder) HasTaproot() bool {
 // It is used to make the appropriate scriptSig
 func buildInputScriptPubKeys(utxo UtxoWithOwner, isTaproot bool) (*scripts.Script, error) {
 	if utxo.IsMultiSig() {
-		script, e := scripts.ScriptFromRaw(utxo.OwnerDetails.MultiSigAddress.ScriptDetails, true)
+		script, e := scripts.ScriptFromRaw(formating.HexToBytes(utxo.OwnerDetails.MultiSigAddress.ScriptDetails), true)
 		if e != nil {
 			return nil, e
 		}
@@ -205,7 +205,7 @@ func buildP2shSegwitRedeemScriptSig(utx UtxoWithOwner) ([]string, error) {
 	if utx.IsMultiSig() {
 		switch utx.OwnerDetails.MultiSigAddress.Address.GetType() {
 		case address.P2WSHInP2SH:
-			script, e := scripts.ScriptFromRaw(utx.OwnerDetails.MultiSigAddress.ScriptDetails, true)
+			script, e := scripts.ScriptFromRaw(formating.HexToBytes(utx.OwnerDetails.MultiSigAddress.ScriptDetails), true)
 			if e != nil {
 				return nil, e
 			}
