@@ -86,6 +86,10 @@ func SingDer(message []byte, privateKey []byte, entryPointes []byte) []byte {
 		edr := new(big.Int).Add(e, dr)
 		s = new(big.Int).Mod(new(big.Int).Mul(kinv, edr), n)
 
+		if s.Cmp(new(big.Int).Div(n, big.NewInt(2))) > 0 {
+			s = new(big.Int).Sub(n, s)
+		}
+
 		if s.Cmp(big.NewInt(0)) != 0 {
 			break
 		}
@@ -118,21 +122,10 @@ func SingInput(privateKey []byte, message []byte, sigHash int) string {
 	R := signature[4 : 4+lengthR]
 	lengthS := int(signature[5+lengthR])
 	S := signature[5+lengthR+1:]
-	sAsBigint := formating.BytesToInt(S)
 
-	var newS []byte
-
-	if lengthS == 33 {
-		newSAsBigint := new(big.Int).Sub(P256k1().Params().N, sAsBigint)
-		newS = encodeBigInt(newSAsBigint)
-		lengthS -= 1
-		lengthTotal -= 1
-	} else {
-		newS = S
-	}
 	newSignature := append([]byte{derPrefix, byte(lengthTotal), byte(derTypeInt), byte(lengthR)}, R...)
 	newSignature = append(newSignature, byte(derTypeInt), byte(lengthS))
-	newSignature = append(newSignature, newS...)
+	newSignature = append(newSignature, S...)
 	newSignature = append(newSignature, byte(sigHash))
 	return formating.BytesToHex(newSignature)
 }
